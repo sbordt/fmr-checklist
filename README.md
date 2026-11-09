@@ -3,10 +3,12 @@
 Source of the website at **https://fmr-checklist.github.io/**: a checklist for
 authors and reviewers of foundation model research, filled in step by step.
 
-* Nine questions, one per page: the research question, then statistical
-  validity, then the approximation strategies of the experiment (proxy models,
-  proxy treatments, proxy outcomes, observational data, units within a single
-  training run, theoretical controls, other approximations).
+* Nine pages: the research question; the approximation strategies of the
+  experiment, one Yes/No question each (proxy models, proxy treatments, proxy
+  outcomes, observational data, units within a single training run, theoretical
+  controls, other approximations); and statistical validity, where noise always
+  has to be addressed and few or dependent units and the best of many
+  comparisons are asked with a Yes/No first.
 * A [Yes] asks which parts of the experiments use the strategy and unfolds the
   validity threats it gives rise to, key threats first, each with a description
   and one example, and a box asking how the paper addresses the threat.

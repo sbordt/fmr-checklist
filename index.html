@@ -97,16 +97,13 @@
   // src: 'new' were added while drafting this page and are shown
   // in pink until reviewed.
   // ------------------------------------------------------------------
-  const QUESTIONS = ['SV', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8']; // the Yes/No questions, in order; A1 comes first
+  const QUESTIONS = ['A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8']; // the Yes/No questions on the strategies; A1 comes first, SV last
   const PART_B = ['SV', 'IV', 'EV', 'CV'];
   const STRATEGY = {
-    SV: 'statistical validity', A2: 'proxy models', A3: 'proxy treatments', A4: 'proxy outcomes', A5: 'observational data',
+    A2: 'proxy models', A3: 'proxy treatments', A4: 'proxy outcomes', A5: 'observational data',
     A6: 'units within a single run', A7: 'theoretical controls', A8: 'other approximations'
   };
   const QUESTIONS_A = {
-    SV: { which: null, q: 'Is the main result subject to noise, few or dependent units, or the best of many comparisons?',
-          desc: 'Every research strategy eventually approximates some population parameter from a finite sample. Statistical validity asks whether the estimate from the finite sample reliably reflects the underlying quantity.',
-          example: null },
     A2: { which: 'Which parts of the experiments involve proxy models?', q: 'Do the experiments involve proxy models?',
           desc: 'A proxy model is a model that is smaller or cheaper to train than the target models the claims are about, and that stands in for them in the experiment.',
           example: '1B models standing in for 32B models; a series of small models fitted with a scaling law to predict behavior at a larger size.' },
@@ -136,11 +133,11 @@
     { id: 'SV-noise', ask: 'noise from a finite sample', type: 'SV', triggers: ['SV'], name: 'Noise and repeated experiments',
       desc: 'When you estimate an effect from a finite, noisy sample, it might not reliably measure the true underlying quantity. What would come out if the experiment were repeated? Does the paper report error bars and say which source of randomness they capture? Observed outcomes may vary due to random initialization, data ordering, sampled evaluation subset, and so on.',
       examples: [{ text: 'The difference between two different training recipes can be smaller than the seed-to-seed variation within one training recipe.' }] },
-    { id: 'SV-units', ask: 'few or dependent units', type: 'SV', triggers: ['SV'], name: 'Few or dependent units',
+    { id: 'SV-units', ask: 'few or dependent units', gate: 'Does the analysis rely on a few units, or on units that are not independent?', type: 'SV', triggers: ['SV'], name: 'Few or dependent units',
       desc: 'If the analysis relies on a few units, or units that are not independent, it makes the estimate less precise than what the raw sample count suggests.',
       examples: [{ text: 'Multiple fine-tunes of one base model are not independent units.' }] },
-    { id: 'SV-best', ask: 'picking the best of many comparisons', type: 'SV', triggers: ['SV'], name: 'Best of many comparisons',
-      desc: 'Does the paper report the best of many noisy comparisons (arms, benchmarks, checkpoints), which may look strong by chance?',
+    { id: 'SV-best', ask: 'picking the best of many comparisons', gate: 'Does the paper report the best of many noisy comparisons (arms, benchmarks, checkpoints)?', type: 'SV', triggers: ['SV'], name: 'Best of many comparisons',
+      desc: 'The best of many noisy comparisons may look strong by chance.',
       examples: [{ text: 'Some labs evaluate many model variants on private benchmark data before publishing the best score (Singh et al., 2025).' }] },
     { id: 'SV-fit', ask: 'the fit of the functional form', type: 'SV', triggers: ['A2'], name: 'Fitted functional form',
       desc: 'If the paper fits a functional form (for example, linear regression or a power-law), then it should justify or test the assumed form, and report the quality of the fit.',
@@ -300,7 +297,7 @@
   // Steps: the research question, then the Yes/No questions, one page each;
   // a Yes unfolds the threats it raises. Then the summary.
   // ------------------------------------------------------------------
-  const ORDER = ['A1'].concat(QUESTIONS);
+  const ORDER = ['A1'].concat(QUESTIONS, ['SV']);
   function steps() {
     return [{ id: 'intro' }].concat(ORDER.map((id) => ({ id: id })), [{ id: 'summary' }]);
   }
@@ -334,8 +331,19 @@
     const tag = t.via && t.via[0] === t.type ? '' : ' <span class="tag">' + esc(type) + '</span>';
     let html = '<div class="threat"><h3>' + esc(t.name) + tag + '</h3><p>' + T(t.desc) + '</p>';
     (t.examples || []).forEach((ex) => { html += '<p class="example' + (ex.src === 'new' ? ' new' : '') + '"><strong>Example:</strong> ' + T(ex.text) + '</p>'; });
-    html += textarea('note:' + t.id, askFor(t), 2) + '</div>';
-    return html;
+    if (t.gate) {
+      // A threat that may or may not occur: a Yes/No first, the box only after a Yes.
+      html += '<p>' + T(t.gate) + '</p>' + radios('gate:' + t.id, ['Yes', 'No']);
+      if (val('gate:' + t.id) === 'Yes') html += textarea('note:' + t.id, askFor(t), 2);
+    } else {
+      html += textarea('note:' + t.id, askFor(t), 2);
+    }
+    return html + '</div>';
+  }
+  function screenSV() {
+    return '<p class="kicker">Page ' + ORDER.length + ' of ' + ORDER.length + '</p><h2>' + ORDER.length + '. Statistical validity</h2>' +
+      '<p>' + T('Every research strategy eventually approximates some population parameter from a finite sample. Statistical validity asks whether the estimate from the finite sample reliably reflects the underlying quantity.') + '</p>' +
+      '<div class="sub">' + threatsFor('SV').map(threatCard).join('') + '</div>';
   }
   // Under "other approximations": one card per type of validity.
   function a8Card(type) {
@@ -348,14 +356,14 @@
     return '<h1>Validity Checklist for Foundation Model Research</h1>' +
       '<p class="muted">Foundation model research relies on strategies that approximate the ideal experiment at a fraction of the cost: proxy models and scaling laws, proxy treatments and outcomes, observational data, units within a single training run, and theoretical controls. Each comes with implicit assumptions. This checklist walks authors and reviewers through them.</p>' +
       '<ul>' +
-      '<li>Nine questions: the research question, then statistical validity and the approximation strategies of the experiment.</li>' +
+      '<li>Nine pages: the research question, the approximation strategies of the experiment, and statistical validity.</li>' +
       '<li>A [Yes] unfolds the validity threats that come with it, each with a description and an example, and asks how the paper addresses them.</li>' +
       '<li>At the end, the result can be exported as Markdown. Answers are stored only in your browser.</li>' +
       '</ul>' +
       '<p class="new">Text in this color was added while drafting this page and is not taken from the paper; it still has to be reviewed.</p>';
   }
   function screenA1() {
-    return '<p class="kicker">Question 1 of ' + ORDER.length + '</p><h2>1. What is the research question?</h2>' +
+    return '<p class="kicker">Page 1 of ' + ORDER.length + '</p><h2>1. What is the research question?</h2>' +
       textarea('A1-rq', 'Research question: one sentence naming treatment, outcome, and target models', 3) +
       textarea('A1-concl', 'Conclusions: the main conclusions the paper draws from this experiment', 3) +
       '<p class="example"><strong>Example:</strong> How does the MMLU benchmark score (outcome) of Olmo 3 32B (target model) change when we remove all math competition data from its pretraining data (treatment)?</p>';
@@ -363,7 +371,7 @@
   function screenA(a) {
     const q = QUESTIONS_A[a];
     const n = ORDER.indexOf(a) + 1;
-    let html = '<p class="kicker">Question ' + n + ' of ' + ORDER.length + '</p><h2>' + n + '. ' + esc(q.q) + '</h2>' +
+    let html = '<p class="kicker">Page ' + n + ' of ' + ORDER.length + '</p><h2>' + n + '. ' + esc(q.q) + '</h2>' +
       '<p>' + T(q.desc) + '</p>' + (q.example ? '<p class="example"><strong>Example:</strong> ' + T(q.example) + '</p>' : '') +
       radios(a, ['Yes', 'No']);
     if (val(a) === 'Yes') {
@@ -401,7 +409,12 @@
       }
       L.push('');
     });
-    L.push('_Filled with the validity checklist at https://fmr-checklist.github.io/_');
+    L.push('## ' + ORDER.length + '. Statistical validity', '');
+    threatsFor('SV').forEach((t) => {
+      if (t.gate) L.push('- ' + t.name + ' [' + (val('gate:' + t.id) || '…') + ']' + (val('gate:' + t.id) === 'Yes' ? ': ' + (val('note:' + t.id) || '…') : ''));
+      else L.push('- ' + t.name + ': ' + (val('note:' + t.id) || '…'));
+    });
+    L.push('', '_Filled with the validity checklist at https://fmr-checklist.github.io/_');
     return L.join('\n');
   }
   function download(name, content, type) {
@@ -424,9 +437,10 @@
     if (step.id === 'intro') html = screenIntro();
     else if (step.id === 'A1') html = screenA1();
     else if (QUESTIONS.includes(step.id)) html = screenA(step.id);
+    else if (step.id === 'SV') html = screenSV();
     else html = screenSummary();
     $('#screen').innerHTML = html;
-    $('#progress-label').textContent = step.id === 'intro' ? '' : step.id === 'summary' ? 'Done' : 'Question ' + i + ' of ' + ORDER.length;
+    $('#progress-label').textContent = step.id === 'intro' ? '' : step.id === 'summary' ? 'Done' : 'Page ' + i + ' of ' + ORDER.length;
     $('#progress-bar').style.width = Math.round(100 * i / (list.length - 1)) + '%';
     $('#back').disabled = (i === 0);
     $('#next').textContent = step.id === 'intro' ? 'Start' : step.id === 'summary' ? 'Review from the start' : (i === list.length - 2 ? 'Finish' : 'Next');
