@@ -126,7 +126,7 @@
           desc: 'A theoretical control is an outcome that was not measured but computed from theory: the paper analytically approximates what the outcome would have been under the treatment or under the control, and compares against that.',
           example: 'Influence functions analytically approximating “what if this data point were not in the training data”; canary data with known statistical properties injected into training, so that the control outcome follows from the distribution of the canaries.' },
     A8: { which: 'Which other approximations do the experiments involve?', q: 'Do the experiments involve other approximations?',
-          desc: 'Any way in which the design deviates from the ideal experiment that is not covered by A2 to A7.',
+          desc: 'Any way in which the design deviates from the ideal experiment that is not covered by the questions above.',
           example: 'Measuring the outcome only at coarse checkpoint intervals; analyzing a subsample of the units.' }
   };
   const VALIDITY = { SV: { name: 'Statistical validity' }, IV: { name: 'Internal validity' }, EV: { name: 'External validity' }, CV: { name: 'Construct validity' } };
@@ -331,7 +331,8 @@
   function threatCard(t) {
     const type = VALIDITY[t.type].name;
     if (t.note) return '<p class="note"><strong>' + esc(t.name) + '</strong> · ' + esc(type) + '. ' + T(t.desc) + '</p>';
-    let html = '<div class="threat"><h3>' + esc(t.name) + ' <span class="tag">' + esc(type) + '</span></h3><p>' + T(t.desc) + '</p>';
+    const tag = t.via && t.via[0] === t.type ? '' : ' <span class="tag">' + esc(type) + '</span>';
+    let html = '<div class="threat"><h3>' + esc(t.name) + tag + '</h3><p>' + T(t.desc) + '</p>';
     (t.examples || []).forEach((ex) => { html += '<p class="example' + (ex.src === 'new' ? ' new' : '') + '"><strong>Example:</strong> ' + T(ex.text) + '</p>'; });
     html += textarea('note:' + t.id, askFor(t), 2) + '</div>';
     return html;

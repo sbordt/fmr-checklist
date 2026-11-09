@@ -3,18 +3,15 @@
 Source of the website at **https://fmr-checklist.github.io/**: a checklist for
 authors and reviewers of foundation model research, filled in step by step.
 
-* Eight questions identify the approximation strategies of the experiment:
-  proxy models, proxy treatments, proxy outcomes, observational data, units
-  within a single training run, theoretical controls, other approximations.
+* Nine questions, one per page: the research question, then statistical
+  validity, then the approximation strategies of the experiment (proxy models,
+  proxy treatments, proxy outcomes, observational data, units within a single
+  training run, theoretical controls, other approximations).
 * A [Yes] asks which parts of the experiments use the strategy and unfolds the
-  validity threats the strategy gives rise to, key threats first, each with a
-  description and one example, and asks how the paper addresses the threat.
-* One page holds the statistical-validity threats that apply to every paper.
-* At the end, for each of the four types of validity (statistical, internal,
-  external, construct), the page asks whether the paper properly discusses the
-  threats to it. [NA] is disabled where a selected strategy makes the type
-  applicable. The result can be exported as Markdown or JSON; answers are kept
-  in the browser only.
+  validity threats it gives rise to, key threats first, each with a description
+  and one example, and a box asking how the paper addresses the threat.
+* The summary exports the result as Markdown or JSON; answers are kept in the
+  browser only.
 
 The questions, descriptions, and examples are taken from the paper *A Framework
 and Checklist for Validity Threats in Foundation Model Research* (under review).
