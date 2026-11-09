@@ -429,18 +429,16 @@
 
   function screenIntro() {
     return '<h1>Validity Checklist for Foundation Model Research</h1>' +
-      '<p class="muted">Controlled experiments at the scale of modern foundation models have become prohibitively expensive. Instead, research relies on strategies that approximate the ideal experiment at a fraction of the cost: proxy experiments and scaling laws, observational studies with publicly available models, and single-run designs that leverage variation within individual training runs. Each strategy replaces parts of the ideal experiment with cheaper substitutes and thereby makes implicit assumptions. This checklist helps authors and reviewers identify them.</p>' +
+      '<p class="muted">Foundation model research relies on strategies that approximate the ideal experiment at a fraction of the cost: proxy models and scaling laws, proxy treatments and outcomes, observational data, units within a single training run, and theoretical controls. Each comes with implicit assumptions. This checklist walks authors and reviewers through them.</p>' +
       '<ul>' +
-      '<li><strong>Part A</strong> states the research question and identifies the approximation strategies of the experiment, one question per page. A [Yes] unfolds the validity threats that the strategy gives rise to, each with a description and an example.</li>' +
-      '<li><strong>Part B</strong> asks, for each threat, whether it is relevant for the paper and how the paper addresses it, and then, for each of the four types of validity, whether the paper <em>properly discusses</em> the threats to it: names it and argues it away, tests it, bounds it, or limits its claims accordingly. It does not ask whether the assumptions hold. A [No] is not disqualifying; it flags threats the paper should discuss.</li>' +
-      '<li><strong>Answers</strong> are [Yes] / [No], and [NA] where the design allows it. [NA] means the threat cannot arise in this design. If it is applicable but undiscussed, answer [No].</li>' +
-      '<li><strong>Justification:</strong> one or two sentences pointing to the supporting section, quote, or figure.</li>' +
+      '<li>Eight questions identify the approximation strategies of the experiment.</li>' +
+      '<li>A [Yes] unfolds the validity threats that the strategy gives rise to, each with a description and an example, and asks how the paper addresses them.</li>' +
+      '<li>At the end, you answer for each of the four types of validity whether the paper properly discusses the threats to it, and you can export the result as Markdown.</li>' +
       '</ul>' +
-      '<p class="new">Text in this color was added while drafting this page and is not taken from the paper; it still has to be reviewed.</p>' +
-      '<label class="field"><span>Paper (authors, title, venue, year)</span><input type="text" name="paper" autocomplete="off" value="' + esc(val('paper')) + '"></label>';
+      '<p class="new">Text in this color was added while drafting this page and is not taken from the paper; it still has to be reviewed.</p>';
   }
   function screenA1() {
-    return '<p class="kicker">Part A · Question 1 of 8</p><h2>A1. What is the research question?</h2>' +
+    return '<p class="kicker">Question 1 of 8</p><h2>A1. What is the research question?</h2>' +
       textarea('A1-rq', 'Research question: one sentence naming treatment, outcome, and target models', 3) +
       textarea('A1-concl', 'Conclusions: the main conclusions the paper draws from this experiment; Part B refers back to them', 3) +
       '<p class="example"><strong>Example:</strong> How does the MMLU benchmark score (outcome) of Olmo 3 32B (target model) change when we remove all math competition data from its pretraining data (treatment)?</p>';
@@ -448,7 +446,7 @@
   function screenA(a) {
     const q = QUESTIONS_A[a];
     const n = PART_A.indexOf(a) + 2;
-    let html = '<p class="kicker">Part A · Question ' + n + ' of 8</p><h2>' + a + '. ' + esc(q.q) + '</h2>' +
+    let html = '<p class="kicker">Question ' + n + ' of 8</p><h2>' + a + '. ' + esc(q.q) + '</h2>' +
       '<p>' + T(q.desc) + '</p><p class="example"><strong>Example:</strong> ' + T(q.example) + '</p>' +
       radios(a, [{ value: 'Yes' }, { value: 'No' }]);
     if (a === 'A8') {
@@ -472,13 +470,13 @@
   }
   function screenGeneral() {
     const items = THREATS.filter((t) => t.triggers.includes('*')).map((t) => Object.assign({}, t, { via: [] }));
-    return '<p class="kicker">Part B · All papers</p><h2>Statistical validity</h2>' +
+    return '<p class="kicker">All papers</p><h2>Statistical validity</h2>' +
       '<p>' + T(VALIDITY.SV.question) + '</p><p class="muted" style="font-size:.95rem">These threats apply to every paper, whatever the strategies selected in Part A.</p>' +
       items.map(threatCard).join('');
   }
   function screenAnswers() {
-    let html = '<p class="kicker">Part B · Answers</p><h2>Validity</h2>' +
-      '<p class="muted">For each type of validity: does the paper properly discuss the threats to it? The applicable threats are the ones unfolded in Part A.</p>';
+    let html = '<p class="kicker">Answers</p><h2>Validity</h2>' +
+      '<p class="muted">For each type of validity: does the paper properly discuss the threats to it? The applicable threats are the ones unfolded under the questions.</p>';
     PART_B.forEach((type) => {
       const v = VALIDITY[type];
       const items = applicable(type);
@@ -488,14 +486,14 @@
       html += '<div class="block"><h3>' + type + '. ' + esc(v.name) + '</h3>';
       if (type === 'SV') html += '<p class="status on">Applies to all papers.</p>';
       else if (active) html += '<p class="status on">Applicable, because ' + via.map((a) => a + ' = Yes (' + STRATEGY[a] + ')').join(', ') + '. [NA] is not allowed.</p>';
-      else html += '<p class="status">None of the strategies selected in Part A makes this applicable. ' + T(v.naMeans) + '</p>';
+      else html += '<p class="status">None of the selected strategies makes this applicable. ' + T(v.naMeans) + '</p>';
       if (threats.length) {
         const open = threats.filter((t) => val('note:' + t.id).trim() === '');
         const names = [];
         open.forEach((t) => { const n = lc(t.name) + (t.via.length ? ' (' + t.via.join(', ') + ')' : ''); if (!names.includes(n)) names.push(n); });
         html += open.length
           ? '<p class="suggest no">Threats without a note yet: ' + esc(names.join('; ')) + '. Answer [No] if the paper leaves any applicable threat undiscussed, and name it.</p>'
-          : '<p class="suggest yes">All ' + threats.length + ' threats raised in Part A have a note.</p>';
+          : '<p class="suggest yes">All ' + threats.length + ' applicable threats have a note.</p>';
       }
       html += radios(type, ['Yes', 'No'].concat(v.allowNA ? ['NA'] : []).map((o) => ({ value: o })), active ? ['NA'] : []);
       html += textarea(type + '-just', 'Justification', 2) + '</div>';
@@ -504,10 +502,10 @@
   }
   function chip(label, cls, step) { return '<button type="button" class="chip ' + cls + '" data-go="' + step + '">' + esc(label) + '</button>'; }
   function screenSummary() {
-    return '<p class="kicker">Summary</p><h2>' + (val('paper') ? esc(val('paper')) : 'Validity checklist') + '</h2>' +
-      '<p class="muted">Approximation strategies (Part A); click a chip to go back to that question.</p><div class="chips">' +
+    return '<p class="kicker">Summary</p><h2>Validity checklist</h2>' +
+      '<p class="muted">Approximation strategies; click a chip to go back to that question.</p><div class="chips">' +
       PART_A.map((a) => chip(a + ' ' + (val(a) || '—'), val(a) === 'Yes' ? 'used' : val(a) === 'No' ? '' : 'open', a)).join('') + '</div>' +
-      '<p class="muted">Validity threats properly discussed (Part B)</p><div class="chips">' +
+      '<p class="muted">Validity threats properly discussed</p><div class="chips">' +
       PART_B.map((t) => chip(t + ' ' + (val(t) || '—'), val(t) ? val(t).toLowerCase() : 'open', 'answers')).join('') + '</div>' +
       '<div class="toolbar"><button type="button" class="primary" id="copy-md">Copy as Markdown</button>' +
       '<button type="button" id="download-md">Download Markdown</button><button type="button" id="download-json">Download JSON</button>' +
@@ -520,14 +518,14 @@
   // ------------------------------------------------------------------
   function markdown() {
     const L = [];
-    L.push('# Validity checklist', '', '**Paper:** ' + (val('paper') || '…'), '');
-    L.push('## Part A — Research question and approximation strategies', '');
+    L.push('# Validity checklist', '');
+    L.push('## Research question and approximation strategies', '');
     L.push('**A1. What is the research question?**', '', 'Research question: ' + (val('A1-rq') || '…'), '', 'Conclusions: ' + (val('A1-concl') || '…'), '');
     PART_A.forEach((a) => {
       L.push('**' + a + '. ' + QUESTIONS_A[a].q + '** [' + (val(a) || '…') + ']' + (a === 'A8' && val('A8') === 'Yes' && a8Types().length ? ' — threatens: ' + a8Types().join(', ') : ''), '');
       if (val(a) === 'Yes') L.push(QUESTIONS_A[a].which + ' ' + (val(a + '-which') || '…'), '');
     });
-    L.push('## Part B — Validity', '');
+    L.push('## Validity', '');
     PART_B.forEach((type) => {
       const items = applicable(type).filter((t) => !t.note);
       const via = triggersOf(type);
@@ -570,8 +568,6 @@
     $('#next').textContent = step.id === 'intro' ? 'Start' : step.id === 'summary' ? 'Review from the start' : (i === list.length - 2 ? 'Finish' : 'Next');
     $('#foot').hidden = !(step.id === 'intro' || step.id === 'summary');
     if (!(opts && opts.keepScroll)) window.scrollTo(0, 0);
-    const first = $('#screen input[type=text]');
-    if (first && step.id === 'intro') first.focus();
     save();
   }
   function go(delta) {
