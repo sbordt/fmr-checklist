@@ -179,74 +179,74 @@
 
   const THREATS = [
     // ---------------- Statistical validity ----------------
-    { id: 'SV-noise', type: 'SV', triggers: ['*'], name: 'Noise and repeated experiments',
+    { id: 'SV-noise', ask: 'noise from a finite sample', type: 'SV', triggers: ['*'], name: 'Noise and repeated experiments',
       desc: 'When you estimate an effect from a finite, noisy sample, it might not reliably measure the true underlying quantity. What would come out if the experiment were repeated? Does the paper report error bars and say which source of randomness they capture? Observed outcomes may vary due to random initialization, data ordering, sampled evaluation subset, and so on.',
       examples: [{ text: 'The difference between two different training recipes can be smaller than the seed-to-seed variation within one training recipe.' }] },
-    { id: 'SV-units', type: 'SV', triggers: ['*'], name: 'Few or dependent units',
+    { id: 'SV-units', ask: 'a small number of units, or dependent units,', type: 'SV', triggers: ['*'], name: 'Few or dependent units',
       desc: 'If the analysis relies on a few units, or units that are not independent, it makes the estimate less precise than what the raw sample count suggests.',
       examples: [{ text: 'Multiple fine-tunes of one base model are not independent units.' }] },
-    { id: 'SV-best', type: 'SV', triggers: ['*'], name: 'Best of many comparisons',
+    { id: 'SV-best', ask: 'picking the best of many comparisons', type: 'SV', triggers: ['*'], name: 'Best of many comparisons',
       desc: 'Does the paper report the best of many noisy comparisons (arms, benchmarks, checkpoints), which may look strong by chance?',
       examples: [{ text: 'Some labs evaluate many model variants on private benchmark data before publishing the best score (Singh et al., 2025).' }] },
-    { id: 'SV-fit', type: 'SV', triggers: ['A2'], name: 'Fitted functional form',
+    { id: 'SV-fit', ask: 'the fit of the functional form', type: 'SV', triggers: ['A2'], name: 'Fitted functional form',
       desc: 'If the paper fits a functional form (for example, linear regression or a power-law), then it should justify or test the assumed form, and report the quality of the fit.',
       examples: [{ text: 'A scaling law of the form L(D) = E + B·D^(−β), fitted to proxy models trained on up to 3B tokens, predicts a monotonically decreasing loss when a small pool of filtered data is repeated; in fact the loss increases after more than eight repetitions.' }] },
-    { id: 'SV-obs', type: 'SV', triggers: ['A5'], name: 'Few documented training runs',
+    { id: 'SV-obs', ask: 'the small number of documented training runs', type: 'SV', triggers: ['A5'], name: 'Few documented training runs',
       desc: 'As of today, the number of fully documented training runs is small, and at frontier scale one cannot generate more, so the estimate of the association may be too noisy to be conclusive.',
       examples: [{ text: 'Estimating recipe-specific effects requires parameters that describe the interaction of the treatment with other family-specific parameters, but fitting those parameters requires more data per family; pooling across families improves precision at the expense of external validity (see EV).' }] },
     { id: 'SV-within', type: 'SV', triggers: ['A6'], note: true, name: 'Units within a single run',
       desc: 'Statistical validity is usually less of a concern here, because the number of units is large. Units that are not independent (see above) still reduce the effective sample size.' },
-    { id: 'SV-theory', type: 'SV', triggers: ['A7'], name: 'Statistical assumptions of the analytical approximation',
+    { id: 'SV-theory', ask: 'the statistical assumptions of the analytical approximation', type: 'SV', triggers: ['A7'], name: 'Statistical assumptions of the analytical approximation',
       desc: 'Analytical approximations may rely on strong statistical assumptions. Injecting more canary data improves statistical validity but modifies the training recipe (see EV).',
       examples: [{ text: 'Influence functions accurately capture the leave-one-out retraining effect for simple models like linear or logistic regression, but the assumptions underlying the approximation fail for frontier models with highly non-convex loss landscapes and complex stochastic training dynamics.' }] },
 
     // ---------------- Internal validity ----------------
-    { id: 'IV-exch-obs', severity: 'key', type: 'IV', triggers: ['A5'], name: 'Exchangeability of the runs with and without the treatment',
+    { id: 'IV-exch-obs', ask: 'exchangeability of the runs with and without the treatment', severity: 'key', type: 'IV', triggers: ['A5'], name: 'Exchangeability of the runs with and without the treatment',
       desc: 'In observational data, the treatment was chosen by the model developers together with the rest of the recipe. The runs that received the treatment must not differ systematically from those that did not. Exchangeability can not be tested with observational data alone; it has to be justified with experiments, or with knowledge about how model developers choose their recipes. It fails through confounders (common causes of treatment and outcome) and selection bias (conditioning on how observations enter the sample, e.g., the decision to publish). Adjusting for measured confounders relaxes it to conditional exchangeability, which requires that no confounder is undocumented.',
       examples: [{ text: 'Architecture and training data composition are confounded by calendar time; a correlation between architecture and benchmark score may actually be caused by data composition.' }] },
-    { id: 'IV-pos-obs', type: 'IV', triggers: ['A5'], name: 'Positivity',
+    { id: 'IV-pos-obs', ask: 'positivity', type: 'IV', triggers: ['A5'], name: 'Positivity',
       desc: 'Even if exchangeability holds, the causal effect of a particular treatment value cannot be estimated unless that value is observed in the sample; when confounders are adjusted for, every treatment value must occur within every stratum of the conditioning covariates. Effects of treatment values that no unit received can only be extrapolated, not estimated.',
       examples: [{ text: 'If a particular optimizer is always paired with a specific learning rate schedule in the released models, the effect of the optimizer alone cannot be estimated.', src: 'new' }] },
-    { id: 'IV-sutva-obs', type: 'IV', triggers: ['A5'], name: 'SUTVA: no interference between runs, and consistency',
+    { id: 'IV-sutva-obs', ask: 'SUTVA (no interference between runs, and consistency)', type: 'IV', triggers: ['A5'], name: 'SUTVA: no interference between runs, and consistency',
       desc: 'No interference: the treatment received by one training run must not influence the potential outcomes of other runs. Consistency: the observed outcome equals the potential outcome under the treatment actually received, so the treatment has to be well defined, that is, all treated units received the same version of it.',
       examples: [{ text: 'No interference: many released models are fine-tuned on synthetic data generated by one model, so a change to that model’s recipe also changes the outcomes of the models trained on its outputs. Consistency: “document is in the training set” hides deduplication, number of epochs, and ordering.' }] },
-    { id: 'IV-exch-within', severity: 'key', type: 'IV', triggers: ['A6'], name: 'Exchangeability of the treated and the control units',
+    { id: 'IV-exch-within', ask: 'exchangeability of the treated and the control units', severity: 'key', type: 'IV', triggers: ['A6'], name: 'Exchangeability of the treated and the control units',
       desc: 'The treated and the control units must not differ systematically. Exchangeability fails when the groups are selected differently. Difference-in-differences and related estimators replace it with more plausible assumptions, whose own assumptions then have to be discussed: difference-in-differences assumes parallel trends, that is, that treated and untreated units would have developed alike without the treatment; a regression discontinuity design assumes that potential outcomes vary continuously across the cutoff that determines treatment assignment.',
       examples: [{ text: 'The within-run estimate overestimates memorization when the treated sequences are sampled randomly but the untreated sequences are near training duplicates, come from a particular domain (code), or are especially hard examples.' }] },
-    { id: 'IV-interf-within', severity: 'key', type: 'IV', triggers: ['A6'], name: 'No interference between units',
+    { id: 'IV-interf-within', ask: 'interference between units', severity: 'key', type: 'IV', triggers: ['A6'], name: 'No interference between units',
       desc: 'Each unit’s outcome must depend only on its own treatment. All units share the same model parameters, so training on document i changes the parameters that also process document j; a control unit that resembles a treated unit is partially treated, which can bias the estimate even under random assignment. This cannot be tested from the run alone.',
       examples: [{ text: 'Right after 100 sequences are inserted into training, 100 untreated near-duplicates of them become about 135 nats more likely, and the gap plateaus at about 40 nats until the end of training: learning a sequence permanently makes near-duplicate sequences more likely.' }] },
-    { id: 'IV-interf-theory', severity: 'key', type: 'IV', triggers: ['A7'], name: 'No interference between units',
+    { id: 'IV-interf-theory', ask: 'interference between units', severity: 'key', type: 'IV', triggers: ['A7'], name: 'No interference between units',
       desc: 'All units share the same model parameters, so training on one unit may affect the outcome, and thereby the theoretical control, for another unit.',
       examples: [{ text: 'Training on canary i may affect the outcome for canary j (Keinan et al., 2025).' }] },
 
     // ---------------- External validity ----------------
-    { id: 'EV-scale', severity: 'key', type: 'EV', triggers: ['A2'], name: 'External validity across scale',
+    { id: 'EV-scale', ask: 'external validity across scale', severity: 'key', type: 'EV', triggers: ['A2'], name: 'External validity across scale',
       desc: 'Effects measured on smaller proxy models can change in size, or even in sign, as we scale the size of the model or the amount of training data. Predictability across scale can not be determined based on experiments with proxy models alone; it has to be verified by conducting additional experiments at a larger scale. The statement that there is a “scaling law” should first of all be seen as a claim for the external validity of the proxy experiments.',
       examples: [{ text: 'The optimal learning rate often decreases with model size; the best value at 1B can be wrong at 70B.' }] },
-    { id: 'EV-recipes-proxy', severity: 'key', type: 'EV', triggers: ['A2'], name: 'External validity across training recipes',
+    { id: 'EV-recipes-proxy', ask: 'external validity across training recipes', severity: 'key', type: 'EV', triggers: ['A2'], name: 'External validity across training recipes',
       desc: 'The measured effect could critically depend on factors that were held fixed in the experiments. If such a factor is changed, then the size, or even the sign, of the effect can change as well. This applies when the proxy differs from the target recipe in more than scale.',
       examples: [{ text: 'Scaling law coefficients change with the pretraining data composition (Bi et al., 2024), and data selection conclusions can flip when other hyperparameters are varied (Wang et al., 2025).' }] },
-    { id: 'EV-recipes-obs', type: 'EV', triggers: ['A5'], name: 'External validity across training recipes',
+    { id: 'EV-recipes-obs', ask: 'external validity across training recipes', type: 'EV', triggers: ['A5'], name: 'External validity across training recipes',
       desc: 'The observational approach often pools data across many model families to obtain enough statistical power. Even if the resulting estimate is causally identified, it is an average effect over the recipes in the sample, not the effect for the target recipe. The two coincide when the treatment effect is homogeneous across recipes, and may diverge when the effect interacts with other recipe components.',
       examples: [{ text: 'Scaling law coefficients change with the pretraining data composition (Bi et al., 2024), and data selection conclusions can flip when other hyperparameters are varied (Wang et al., 2025).' }] },
-    { id: 'EV-units', type: 'EV', triggers: ['A6'], name: 'External validity across units',
+    { id: 'EV-units', ask: 'external validity across units', type: 'EV', triggers: ['A6'], name: 'External validity across units',
       desc: 'If the paper measures an average effect, then this effect could hide that individual units or subgroups react differently to the treatment. Since the within-run approach averages across units, it does not quantify the effect for any single unit; the average must transfer to the individual units, or the subpopulation of units, the claims are about.',
       examples: [{ text: 'An average memorization effect near zero is compatible with strong memorization of particular documents.' }] },
-    { id: 'EV-models-theory', type: 'EV', triggers: ['A7'], name: 'External validity across models',
+    { id: 'EV-models-theory', ask: 'external validity across models', type: 'EV', triggers: ['A7'], name: 'External validity across models',
       desc: 'Injecting canary data to obtain a theoretical control modifies the training recipe, so the estimate applies to the modified recipe and may not transfer to the target model.',
       examples: [{ text: 'Canary insertion may degrade model performance depending on signal strength, from up to a 5% accuracy drop (Steinke et al., 2023) to negligible impact for Gaussian canaries (Pawelczyk et al., 2024).' }] },
     { id: 'EV-units-theory', type: 'EV', triggers: ['A7'], note: true, name: 'External validity across units',
       desc: 'Analytical controls can be used to estimate effects for individual units, thereby maintaining external validity across units.' },
 
     // ---------------- Construct validity ----------------
-    { id: 'CV-treatment', severity: 'key', type: 'CV', triggers: ['A3'], name: 'Construct validity of the treatment',
+    { id: 'CV-treatment', ask: 'construct validity of the treatment', severity: 'key', type: 'CV', triggers: ['A3'], name: 'Construct validity of the treatment',
       desc: 'Two treatments that look alike can act on the outcome in different ways, so the measured effect may be a different effect than the one claimed. The concrete implementation of a concept is its operationalization; the question is whether the effect of the proxy treatment equals the effect of the treatment named in the research question.',
       examples: [{ text: 'Multi-epoch fine-tuning memorizes far more than single-epoch pre-training, so it overestimates privacy leakage: in a pretraining run with canaries the membership-inference AUC reaches at most 0.768, while fine-tuning a clean model on the same canaries reaches near-perfect memorization within two epochs.' }] },
-    { id: 'CV-outcome', severity: 'key', type: 'CV', triggers: ['A4'], name: 'Construct validity of the outcome',
+    { id: 'CV-outcome', ask: 'construct validity of the outcome', severity: 'key', type: 'CV', triggers: ['A4'], name: 'Construct validity of the outcome',
       desc: 'The treatment may affect the measured outcome but not the outcome of interest, or vice versa; the question is whether changes measured in the proxy outcome accurately reflect changes in the original outcome.',
       examples: [{ text: 'Improvement in “validation loss” does not necessarily reflect improvement in “reasoning capabilities”, and predicting benchmark performance from a subset of its questions breaks down as model capabilities increase (Zhang et al., 2025).' }] },
-    { id: 'CV-treatment-theory', type: 'CV', triggers: ['A7'], name: 'Construct validity of the treatment',
+    { id: 'CV-treatment-theory', ask: 'construct validity of the treatment', type: 'CV', triggers: ['A7'], name: 'Construct validity of the treatment',
       desc: 'Analytical approximations may rely on proxy treatments, so the measured effect may be a different effect than the one claimed.',
       examples: [{ text: 'Influence functions replace the effect of “removing one data point” with “reducing the weight of one data point”.' }] },
     { id: 'CV-obs', type: 'CV', triggers: ['A5'], note: true, name: 'Observational data combined with proxies',
@@ -333,7 +333,7 @@
   // ------------------------------------------------------------------
   // State
   // ------------------------------------------------------------------
-  const STORAGE_KEY = 'fmr-checklist-v4';
+  const STORAGE_KEY = 'fmr-checklist-v5';
   const state = { step: 'intro', discussed: {}, A8types: [] };
   const $ = (sel, root) => (root || document).querySelector(sel);
   const $$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
@@ -341,7 +341,7 @@
   function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* unavailable */ } }
   function load() { try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) Object.assign(state, JSON.parse(raw)); } catch (e) { /* ignore */ } }
   const val = (k) => state[k] || '';
-  const a8Types = () => PART_B.filter((t) => state['A8t:' + t] === 'Yes');
+  const a8Types = () => PART_B.filter((t) => val('note:A8-' + t).trim() !== '');
 
   // ------------------------------------------------------------------
   // The graph: which threats apply, given the Part A answers.
@@ -411,34 +411,20 @@
   function textarea(name, label, rows) {
     return '<label class="field"><span>' + T(label) + '</span><textarea name="' + name + '" rows="' + (rows || 3) + '">' + esc(val(name)) + '</textarea></label>';
   }
+  function askFor(t) { return 'Is ' + (t.ask || lc(t.name)) + ' relevant for the paper, and if so, how does the paper address it?'; }
   function threatCard(t) {
     const type = VALIDITY[t.type].name;
     if (t.note) return '<p class="note"><strong>' + esc(t.name) + '</strong> · ' + esc(type) + '. ' + T(t.desc) + '</p>';
     let html = '<div class="threat"><h3>' + esc(t.name) + ' <span class="tag">' + esc(type) + '</span></h3><p>' + T(t.desc) + '</p>';
     (t.examples || []).forEach((ex) => { html += '<p class="example' + (ex.src === 'new' ? ' new' : '') + '"><strong>Example:</strong> ' + T(ex.text) + '</p>'; });
-    const d = state.discussed[t.id];
-    html += '<div class="ask"><span>Does the paper properly discuss this threat?</span><div class="answer">' +
-      '<label><input type="radio" name="disc:' + t.id + '" value="yes"' + (d === true ? ' checked' : '') + '> Yes</label>' +
-      '<label><input type="radio" name="disc:' + t.id + '" value="no"' + (d === false ? ' checked' : '') + '> No</label></div>' +
-      textarea('disc-just:' + t.id, 'How does the paper discuss this threat?', 2) + '</div></div>';
+    html += textarea('note:' + t.id, askFor(t), 2) + '</div>';
     return html;
   }
-
   function a8Card(type) {
     const v = VALIDITY[type];
-    const id = 'A8-' + type;
-    let html = '<div class="threat"><h3>' + esc(v.name) + '</h3><p>' + T(v.question) + '</p>' +
+    return '<div class="threat"><h3>' + esc(v.name) + '</h3><p>' + T(v.question) + '</p>' +
       (v.naMeans ? '<p class="example">' + T(v.naMeans) + '</p>' : '') +
-      '<div class="ask"><span>Does the approximation threaten this type of validity?</span>' +
-      radios('A8t:' + type, [{ value: 'Yes' }, { value: 'No' }]) + '</div>';
-    if (state['A8t:' + type] === 'Yes') {
-      const d = state.discussed[id];
-      html += '<div class="ask"><span>Does the paper properly discuss this threat?</span><div class="answer">' +
-        '<label><input type="radio" name="disc:' + id + '" value="yes"' + (d === true ? ' checked' : '') + '> Yes</label>' +
-        '<label><input type="radio" name="disc:' + id + '" value="no"' + (d === false ? ' checked' : '') + '> No</label></div>' +
-        textarea('disc-just:' + id, 'How does the paper discuss this threat?', 2) + '</div>';
-    }
-    return html + '</div>';
+      textarea('note:A8-' + type, 'Is ' + v.name.toLowerCase() + ' relevant for this approximation, and if so, how does the paper address it?', 2) + '</div>';
   }
 
   function screenIntro() {
@@ -446,7 +432,7 @@
       '<p class="muted">Controlled experiments at the scale of modern foundation models have become prohibitively expensive. Instead, research relies on strategies that approximate the ideal experiment at a fraction of the cost: proxy experiments and scaling laws, observational studies with publicly available models, and single-run designs that leverage variation within individual training runs. Each strategy replaces parts of the ideal experiment with cheaper substitutes and thereby makes implicit assumptions. This checklist helps authors and reviewers identify them.</p>' +
       '<ul>' +
       '<li><strong>Part A</strong> states the research question and identifies the approximation strategies of the experiment, one question per page. A [Yes] unfolds the validity threats that the strategy gives rise to, each with a description and an example.</li>' +
-      '<li><strong>Part B</strong> asks, for each threat and then for each of the four types of validity, whether the paper <em>properly discusses</em> it: names it and argues it away, tests it, bounds it, or limits its claims accordingly. It does not ask whether the assumptions hold. A [No] is not disqualifying; it flags threats the paper should discuss.</li>' +
+      '<li><strong>Part B</strong> asks, for each threat, whether it is relevant for the paper and how the paper addresses it, and then, for each of the four types of validity, whether the paper <em>properly discusses</em> the threats to it: names it and argues it away, tests it, bounds it, or limits its claims accordingly. It does not ask whether the assumptions hold. A [No] is not disqualifying; it flags threats the paper should discuss.</li>' +
       '<li><strong>Answers</strong> are [Yes] / [No], and [NA] where the design allows it. [NA] means the threat cannot arise in this design. If it is applicable but undiscussed, answer [No].</li>' +
       '<li><strong>Justification:</strong> one or two sentences pointing to the supporting section, quote, or figure.</li>' +
       '</ul>' +
@@ -474,7 +460,6 @@
       }
       return html;
     }
-    html += textarea(a + '-just', 'Justification', 2);
     if (val(a) === 'Yes') {
       const items = threatsFor(a);
       if (items.length) {
@@ -505,12 +490,12 @@
       else if (active) html += '<p class="status on">Applicable, because ' + via.map((a) => a + ' = Yes (' + STRATEGY[a] + ')').join(', ') + '. [NA] is not allowed.</p>';
       else html += '<p class="status">None of the strategies selected in Part A makes this applicable. ' + T(v.naMeans) + '</p>';
       if (threats.length) {
-        const undisc = threats.filter((t) => state.discussed[t.id] !== true);
+        const open = threats.filter((t) => val('note:' + t.id).trim() === '');
         const names = [];
-        undisc.forEach((t) => { const n = lc(t.name) + (t.via.length ? ' (' + t.via.join(', ') + ')' : ''); if (!names.includes(n)) names.push(n); });
-        html += undisc.length
-          ? '<p class="suggest no">Not marked as properly discussed: ' + esc(names.join('; ')) + '. If the paper leaves any of them undiscussed, answer [No] and name it.</p>'
-          : '<p class="suggest yes">All ' + threats.length + ' applicable threats are marked as properly discussed, which supports a [Yes].</p>';
+        open.forEach((t) => { const n = lc(t.name) + (t.via.length ? ' (' + t.via.join(', ') + ')' : ''); if (!names.includes(n)) names.push(n); });
+        html += open.length
+          ? '<p class="suggest no">Threats without a note yet: ' + esc(names.join('; ')) + '. Answer [No] if the paper leaves any applicable threat undiscussed, and name it.</p>'
+          : '<p class="suggest yes">All ' + threats.length + ' threats raised in Part A have a note.</p>';
       }
       html += radios(type, ['Yes', 'No'].concat(v.allowNA ? ['NA'] : []).map((o) => ({ value: o })), active ? ['NA'] : []);
       html += textarea(type + '-just', 'Justification', 2) + '</div>';
@@ -540,7 +525,7 @@
     L.push('**A1. What is the research question?**', '', 'Research question: ' + (val('A1-rq') || '…'), '', 'Conclusions: ' + (val('A1-concl') || '…'), '');
     PART_A.forEach((a) => {
       L.push('**' + a + '. ' + QUESTIONS_A[a].q + '** [' + (val(a) || '…') + ']' + (a === 'A8' && val('A8') === 'Yes' && a8Types().length ? ' — threatens: ' + a8Types().join(', ') : ''), '');
-      L.push((a === 'A8' ? 'Description: ' : 'Justification: ') + (val(a + '-just') || '…'), '');
+      if (a === 'A8' && val('A8') === 'Yes') L.push('Description: ' + (val('A8-just') || '…'), '');
     });
     L.push('## Part B — Validity', '');
     PART_B.forEach((type) => {
@@ -548,11 +533,7 @@
       const via = triggersOf(type);
       L.push('**' + type + '. ' + VALIDITY[type].name + '** [' + (val(type) || '…') + ']' +
         (type !== 'SV' ? (via.length ? ' — applicable because ' + via.join(', ') + ' = Yes' : ' — not applicable for the selected strategies') : ''), '');
-      items.forEach((t) => {
-        const d = state.discussed[t.id];
-        L.push('- [' + (d === true ? 'x' : ' ') + '] ' + t.name + (t.via.length ? ' (' + t.via.join(', ') + ')' : '') + (d === false ? ' — not discussed' : d === undefined ? ' — not assessed' : ''));
-        if (val('disc-just:' + t.id)) L.push('  ' + val('disc-just:' + t.id));
-      });
+      items.forEach((t) => { L.push('- ' + t.name + (t.via.length ? ' (' + t.via.join(', ') + ')' : '') + ': ' + (val('note:' + t.id) || '…')); });
       if (items.length) L.push('');
       L.push('Justification: ' + (val(type + '-just') || '…'), '');
     });
@@ -615,11 +596,9 @@
   $('#screen').addEventListener('change', (ev) => {
     const el = ev.target;
     let rerender = false;
-    if (el.type === 'radio' && el.name.startsWith('disc:')) {
-      state.discussed[el.name.slice(5)] = (el.value === 'yes');
-    } else if (el.type === 'radio') {
+    if (el.type === 'radio') {
       state[el.name] = el.value;
-      if (PART_A.includes(el.name) || el.name.startsWith('A8t:')) rerender = true; // unfold or fold the threats
+      if (PART_A.includes(el.name)) rerender = true; // unfold or fold the threats
     }
     // A disabled [NA] cannot stay selected once a strategy makes the type applicable.
     PART_B.forEach((type) => { if (state[type] === 'NA' && (type === 'SV' || triggersOf(type).length)) state[type] = ''; });
