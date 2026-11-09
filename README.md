@@ -22,7 +22,7 @@ paper; it is marked so that it can be reviewed.
 
 | File | Contents |
 |---|---|
-| `index.html` | The page: Part A, the generated Part B, a summary, and export as Markdown or JSON. Answers are kept in the browser (`localStorage`); nothing is sent anywhere. No external dependencies. The strategy-to-threat graph is the `THREATS` table in the script. |
+| `index.html` | The page, as a step-by-step form: intro, A1 to A8 one per screen, then for each validity type one screen per applicable threat and one answer screen, and a summary with export as Markdown or JSON. Terms the checklist defines are underlined and show their definition on hover (the `GLOSSARY` table). Answers are kept in the browser (`localStorage`); nothing is sent anywhere. No external dependencies. The strategy-to-threat graph is the `THREATS` table in the script. |
 | `checklist.md` | The checklist as plain Markdown, in the form of the paper's appendix. |
 
 ## Development

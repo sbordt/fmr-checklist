@@ -16,208 +16,124 @@
             --accent: #8ab4f8; --yes: #7ccc80; --no: #ef7070; --na: #a0a5ad; --new: #ff5fb0; }
   }
   * { box-sizing: border-box; }
+  html, body { height: 100%; }
   body { margin: 0; background: var(--bg); color: var(--fg);
-         font: 17px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-  main { max-width: 720px; margin: 0 auto; padding: 32px 16px 96px; }
-  h1 { font-size: 1.7rem; line-height: 1.2; margin: 0 0 10px; }
-  h2 { font-size: 1.35rem; margin: 56px 0 6px; }
-  h3 { font-size: 1.08rem; margin: 0 0 6px; line-height: 1.35; }
-  h4 { font-size: 1rem; margin: 0 0 4px; }
+         font: 17px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  .app { max-width: 680px; margin: 0 auto; min-height: 100%; padding: 20px 16px 24px; display: flex; flex-direction: column; }
+  .top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: .9rem; color: var(--muted); }
+  .top .brand { font-weight: 600; color: var(--fg); }
+  .bar { height: 4px; background: var(--line); border-radius: 2px; margin: 8px 0 24px; overflow: hidden; }
+  .bar > div { height: 100%; background: var(--accent); width: 0; transition: width .25s; }
+  .screen { flex: 1; }
+  .kicker { font-size: .85rem; letter-spacing: .02em; text-transform: uppercase; color: var(--accent); margin: 0 0 6px; }
+  h1 { font-size: 1.6rem; line-height: 1.2; margin: 0 0 12px; }
+  h2 { font-size: 1.35rem; line-height: 1.3; margin: 0 0 12px; }
+  h3 { font-size: 1.05rem; margin: 16px 0 6px; }
   p { margin: 8px 0; }
   a { color: var(--accent); }
-  .lead, .muted { color: var(--muted); }
+  .muted { color: var(--muted); }
   .new { color: var(--new); }
   ul { padding-left: 20px; margin: 6px 0; }
   li { margin: 4px 0; }
-  .q { border-top: 1px solid var(--line); padding: 18px 0 6px; }
-  .qid { color: var(--accent); margin-right: 6px; }
-  .desc { margin: 4px 0; }
-  .example { color: var(--muted); margin: 4px 0; }
-  .answer { display: flex; flex-wrap: wrap; gap: 16px; margin: 10px 0 4px; }
-  .answer label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
-  .answer label.off { opacity: .4; cursor: not-allowed; }
-  textarea, input[type=text] { width: 100%; font: inherit; color: inherit; background: var(--bg);
-                               border: 1px solid var(--line); border-radius: 6px; padding: 8px; }
-  label.field { display: block; margin: 8px 0; }
-  label.field > span { display: block; font-size: .92rem; color: var(--muted); margin-bottom: 3px; }
-  .routes { font-size: .92rem; color: var(--muted); margin: 6px 0 0; }
-  .routes b { font-weight: 600; color: var(--fg); }
-  .status { font-size: .95rem; margin: 4px 0 10px; }
+  .example { color: var(--muted); margin: 6px 0; }
+  .status { font-size: .95rem; margin: 0 0 10px; color: var(--muted); }
   .status.on { color: var(--accent); }
-  .threat { background: var(--soft); border-radius: 8px; padding: 12px 14px; margin: 10px 0; }
-  .threat.note { background: none; padding: 4px 0; color: var(--muted); border-left: 3px solid var(--line); padding-left: 12px; }
-  .tag { display: inline-block; font-size: .8rem; color: var(--accent); border: 1px solid var(--accent);
-         border-radius: 999px; padding: 0 8px; margin-left: 6px; vertical-align: middle; }
-  .discussed { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; font-size: .95rem; }
-  .suggest { font-size: .95rem; color: var(--muted); margin: 6px 0; }
+  .answer { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 6px; }
+  .answer label { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 8px;
+                  padding: 8px 14px; cursor: pointer; background: var(--soft); }
+  .answer label:has(input:checked) { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+  .answer label.off { opacity: .4; cursor: not-allowed; }
+  .answer input { margin: 0; }
+  textarea, input[type=text] { width: 100%; font: inherit; color: inherit; background: var(--bg);
+                               border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+  label.field { display: block; margin: 12px 0; }
+  label.field > span { display: block; font-size: .92rem; color: var(--muted); margin-bottom: 4px; }
+  .routes { font-size: .92rem; color: var(--muted); margin: 12px 0 0; }
+  .routes b { font-weight: 600; color: var(--fg); }
+  .suggest { font-size: .95rem; margin: 6px 0; color: var(--muted); }
   .suggest.yes { color: var(--yes); } .suggest.no { color: var(--no); }
-  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
-  .chip { border: 1px solid var(--line); border-radius: 999px; padding: 1px 10px; font-size: .9rem; }
+  .note { border-left: 3px solid var(--line); padding-left: 12px; color: var(--muted); font-size: .95rem; margin: 12px 0; }
+  details { margin: 10px 0; color: var(--muted); font-size: .95rem; }
+  details summary { cursor: pointer; color: var(--fg); }
+  .types { display: flex; flex-wrap: wrap; gap: 14px; margin: 6px 0; font-size: .95rem; }
+  .types label { display: inline-flex; gap: 6px; align-items: center; }
+  .nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--line); }
+  button { font: inherit; font-size: .95rem; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--line);
+           background: var(--soft); color: var(--fg); cursor: pointer; }
+  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  @media (prefers-color-scheme: dark) { button.primary { color: #141416; } }
+  button:disabled { opacity: .4; cursor: default; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 14px; }
+  .chip { border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; font-size: .9rem; background: none; color: var(--fg); cursor: pointer; }
   .chip.used { color: var(--accent); border-color: var(--accent); }
   .chip.yes { color: var(--yes); border-color: var(--yes); }
   .chip.no { color: var(--no); border-color: var(--no); }
   .chip.na { color: var(--na); border-color: var(--na); }
   .chip.open { color: var(--muted); border-style: dashed; }
-  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
-  button { font: inherit; font-size: .95rem; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--line);
-           background: var(--soft); color: var(--fg); cursor: pointer; }
-  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-  @media (prefers-color-scheme: dark) { button.primary { color: #141416; } }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
   .msg { color: var(--muted); font-size: .92rem; min-height: 1.4em; }
-  pre.export { white-space: pre-wrap; background: var(--soft); border-radius: 8px; padding: 12px; font-size: .88rem;
-               max-height: 300px; overflow: auto; }
-  .types { display: flex; flex-wrap: wrap; gap: 14px; margin: 6px 0; font-size: .95rem; }
-  .types label { display: inline-flex; gap: 6px; align-items: center; }
-  footer { margin-top: 56px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: .92rem; }
-  @media print { .noprint, button { display: none !important; } .threat { background: none; padding: 4px 0; } main { padding: 0; } }
+  pre.export { white-space: pre-wrap; background: var(--soft); border-radius: 8px; padding: 12px; font-size: .85rem;
+               max-height: 220px; overflow: auto; }
+  footer { margin-top: 16px; color: var(--muted); font-size: .85rem; }
+  .term { text-decoration: underline dotted; text-decoration-color: var(--accent); text-underline-offset: 3px; cursor: help; }
+  #tip { position: absolute; z-index: 10; background: var(--fg); color: var(--bg); padding: 8px 10px; border-radius: 8px;
+         font-size: .9rem; line-height: 1.4; box-shadow: 0 4px 16px rgba(0,0,0,.25); pointer-events: none; }
+  @media print { .term { text-decoration: none; } #tip { display: none; } }
+  @media print { .nav, .top, .bar, .toolbar, button, .msg { display: none !important; } pre.export { max-height: none; } }
 </style>
 </head>
 <body>
-<main>
-
-<h1>Validity Checklist for Foundation Model Research</h1>
-<p class="lead">Controlled experiments at the scale of modern foundation models have become prohibitively expensive. Instead, research relies on strategies that approximate the ideal experiment at a fraction of the cost: proxy experiments and scaling laws, observational studies with publicly available models, and single-run designs that leverage variation within individual training runs. Each strategy replaces parts of the ideal experiment with cheaper substitutes and thereby makes implicit assumptions. This checklist helps authors and reviewers identify them.</p>
-
-<section class="howto">
-  <ul>
-    <li><strong>Part A</strong> states the research question and identifies the approximation strategies of the experiment.</li>
-    <li><strong>Part B</strong> asks, for each of the four types of validity, whether the paper <em>properly discusses</em> the threats to it: names them and argues them away, tests them, bounds them, or limits its claims accordingly. It does not ask whether the assumptions hold. A [No] is not disqualifying; it flags threats the paper should discuss. Part B lists only the threats that the strategies selected in Part A give rise to.</li>
-    <li><strong>Answers</strong> are [Yes] / [No], and [NA] where the design allows it. [NA] means the threat cannot arise in this design. If it is applicable but undiscussed, answer [No].</li>
-    <li><strong>Justification:</strong> one or two sentences pointing to the supporting section, quote, or figure.</li>
-  </ul>
-  <p class="new noprint" id="new-legend">Text in this color was added while drafting this page and is not taken from the paper; it still has to be reviewed.</p>
-</section>
-
-<h2>Part A — Research Question and Approximation Strategies</h2>
-
-<label class="field"><span>Paper (authors, title, venue, year)</span><input type="text" name="paper" autocomplete="off"></label>
-
-<section class="q" id="A1">
-  <h3><span class="qid">A1.</span>What is the research question?</h3>
-  <label class="field"><span>Research question: one sentence naming treatment, outcome, and target models</span><textarea name="A1-rq" rows="2"></textarea></label>
-  <label class="field"><span>Conclusions: the main conclusions the paper draws from this experiment; Part B refers back to them</span><textarea name="A1-concl" rows="3"></textarea></label>
-  <ul class="muted">
-    <li>The <strong>treatment</strong> is the change to the training process or data whose effect the paper wants to know (e.g., adding math data to the pre-training mix, lowering the learning rate, including a document in the training set). The <strong>control</strong> is the same setup without that change.</li>
-    <li>The <strong>outcome</strong> is the property measured to see the effect (e.g., a benchmark score, the training loss, how well a document is memorized).</li>
-    <li>The <strong>target models</strong> are the models the paper's <em>conclusions</em> are about. They may be larger, or trained differently, than the models the paper actually trains.</li>
-    <li>A <strong>unit</strong> is the thing that does or does not receive the treatment and on which the outcome is measured. Usually a unit is one training run; in some designs it is a document, token, or subword within one run. Units with the treatment form the <strong>treatment group</strong>, units without it the <strong>control group</strong>.</li>
-    <li>Example: How does the MMLU benchmark score (outcome) of Olmo 3 32B (target model) change when we remove all math competition data from its pretraining data (treatment)?</li>
-  </ul>
-</section>
-
-<section class="q" id="A2">
-  <h3><span class="qid">A2.</span>Do the experiments involve proxy models?</h3>
-  <p class="desc">A proxy model is a model that is smaller or cheaper to train than the target models the claims are about, and that stands in for them in the experiment.</p>
-  <p class="example">Example: 1B models standing in for 32B models; a series of small models fitted with a scaling law to predict behavior at a larger size.</p>
-  <div class="answer"><label><input type="radio" name="A2" value="Yes"> Yes</label><label><input type="radio" name="A2" value="No"> No</label></div>
-  <label class="field"><span>Justification</span><textarea name="A2-just" rows="2"></textarea></label>
-  <p class="routes" data-routes="A2"></p>
-</section>
-
-<section class="q" id="A3">
-  <h3><span class="qid">A3.</span>Do the experiments involve proxy treatments?</h3>
-  <p class="desc">A proxy treatment replaces the treatment the paper cares about with a cheaper stand-in, or only observes a proxy of it instead of implementing it.</p>
-  <p class="example">Example: fine-tuning on private data instead of pre-training on it; per-domain loss as a stand-in for the true data-mixture weights.</p>
-  <div class="answer"><label><input type="radio" name="A3" value="Yes"> Yes</label><label><input type="radio" name="A3" value="No"> No</label></div>
-  <label class="field"><span>Justification</span><textarea name="A3-just" rows="2"></textarea></label>
-  <p class="routes" data-routes="A3"></p>
-</section>
-
-<section class="q" id="A4">
-  <h3><span class="qid">A4.</span>Do the experiments involve proxy outcomes?</h3>
-  <p class="desc">A proxy outcome replaces the outcome the paper cares about with a cheaper stand-in.</p>
-  <p class="example">Example: “training loss” as stand-in for “benchmark score”; a small subset of benchmark questions as stand-in for the full benchmark.</p>
-  <div class="answer"><label><input type="radio" name="A4" value="Yes"> Yes</label><label><input type="radio" name="A4" value="No"> No</label></div>
-  <label class="field"><span>Justification</span><textarea name="A4-just" rows="2"></textarea></label>
-  <p class="routes" data-routes="A4"></p>
-</section>
-
-<section class="q" id="A5">
-  <h3><span class="qid">A5.</span>Do the experiments involve observational data?</h3>
-  <p class="desc">Data is <em>experimental</em> if the researchers decided which units receive the treatment (they ran the training runs, ablations, or sweeps themselves). It is <em>observational</em> if the runs already existed and someone else made those decisions, so the researchers did not control and do not know how the treatment was assigned.</p>
-  <p class="example">Example: relating recipe choices to benchmark scores across publicly released models; analyzing released checkpoints of an existing model suite; using leaderboards or model cards.</p>
-  <div class="answer"><label><input type="radio" name="A5" value="Yes"> Yes</label><label><input type="radio" name="A5" value="No"> No</label></div>
-  <label class="field"><span>Justification</span><textarea name="A5-just" rows="2"></textarea></label>
-  <p class="routes" data-routes="A5"></p>
-</section>
-
-<section class="q" id="A6">
-  <h3><span class="qid">A6.</span>Do the experiments treat elements of a single training run as independent units?</h3>
-  <p class="desc">This strategy emulates two or more training runs from a single run: elements of the run (documents, tokens, subwords, …) are treated as independently treatable units, each with its own treatment status and outcome.</p>
-  <p class="example">Example: documents in the training set form the treatment group, held-out documents the control group, and the model's loss on each document is its outcome.</p>
-  <div class="answer"><label><input type="radio" name="A6" value="Yes"> Yes</label><label><input type="radio" name="A6" value="No"> No</label></div>
-  <label class="field"><span>Justification</span><textarea name="A6-just" rows="2"></textarea></label>
-  <p class="routes" data-routes="A6"></p>
-</section>
-
-<section class="q" id="A7">
-  <h3><span class="qid">A7.</span>Do the experiments use theoretical controls?</h3>
-  <p class="desc">A theoretical control is an outcome that was not measured but computed from theory: the paper analytically approximates what the outcome <em>would have been</em> under the treatment or under the control, and compares against that.</p>
-  <p class="example">Example: influence functions analytically approximating “what if this data point were not in the training data”; canary data with known statistical properties injected into training, so that the control outcome follows from the distribution of the canaries.</p>
-  <div class="answer"><label><input type="radio" name="A7" value="Yes"> Yes</label><label><input type="radio" name="A7" value="No"> No</label></div>
-  <label class="field"><span>Justification</span><textarea name="A7-just" rows="2"></textarea></label>
-  <p class="routes" data-routes="A7"></p>
-</section>
-
-<section class="q" id="A8">
-  <h3><span class="qid">A8.</span>Do the experiments involve other approximations?</h3>
-  <p class="desc">Any way in which the design deviates from the ideal experiment that is not covered by A2 to A7.</p>
-  <p class="example">Example: measuring the outcome only at coarse checkpoint intervals; analyzing a subsample of the units.</p>
-  <div class="answer"><label><input type="radio" name="A8" value="Yes"> Yes</label><label><input type="radio" name="A8" value="No"> No</label></div>
-  <label class="field"><span>Description of the approximation</span><textarea name="A8-just" rows="2"></textarea></label>
-  <div id="A8-types" hidden>
-    <p class="routes">Name the validity types that the approximation threatens; [NA] is then not allowed for those questions.</p>
-    <div class="types">
-      <label><input type="checkbox" name="A8-SV"> Statistical</label>
-      <label><input type="checkbox" name="A8-IV"> Internal</label>
-      <label><input type="checkbox" name="A8-EV"> External</label>
-      <label><input type="checkbox" name="A8-CV"> Construct</label>
-    </div>
+<div class="app">
+  <div class="top"><span class="brand">Validity Checklist for Foundation Model Research</span><span id="progress-label"></span></div>
+  <div class="bar"><div id="progress-bar"></div></div>
+  <div class="screen" id="screen"></div>
+  <div class="nav">
+    <button type="button" id="back">Back</button>
+    <span class="msg" id="msg"></span>
+    <button type="button" class="primary" id="next">Next</button>
   </div>
-</section>
-
-<h2>Part B — Validity</h2>
-<p class="lead">Each question asks whether the paper properly discusses the threats to one type of validity. The threats listed under each question are the ones that follow from the answers in Part A; check a threat once the paper names it and argues it away, tests it, bounds it, or limits its claims accordingly.</p>
-<div id="partB"></div>
-
-<h2>Summary</h2>
-<p class="muted">Approximation strategies (Part A)</p>
-<div class="chips" id="summary-a"></div>
-<p class="muted">Validity threats properly discussed (Part B)</p>
-<div class="chips" id="summary-b"></div>
-
-<h2 class="noprint">Export</h2>
-<div class="toolbar noprint">
-  <button type="button" class="primary" id="copy-md">Copy as Markdown</button>
-  <button type="button" id="download-md">Download Markdown</button>
-  <button type="button" id="download-json">Download JSON</button>
-  <button type="button" id="print">Print</button>
-  <button type="button" id="reset">Reset</button>
+  <footer id="foot" hidden><p>The questions, descriptions, and examples are taken from the paper <em>A Framework and Checklist for Validity Threats in Foundation Model Research</em> (under review). Answers are stored only in your browser. Source: <a href="https://github.com/fmr-checklist/fmr-checklist.github.io">github.com/fmr-checklist/fmr-checklist.github.io</a>.</p></footer>
 </div>
-<p class="msg noprint" id="msg"></p>
-<pre class="export noprint" id="preview"></pre>
-
-<footer>
-  <p>The questions, descriptions, and examples are taken from the paper <em>A Framework and Checklist for Validity Threats in Foundation Model Research</em> (under review). Answers are stored only in your browser. Source: <a href="https://github.com/fmr-checklist/fmr-checklist.github.io">github.com/fmr-checklist/fmr-checklist.github.io</a>.</p>
-</footer>
-
-</main>
+<div id="tip" role="tooltip" hidden></div>
 
 <script>
 (function () {
   'use strict';
 
   // ------------------------------------------------------------------
-  // The graph: Part A strategy -> validity type -> specific threat.
-  // All descriptions and examples are taken from the paper (Sections 3-5,
-  // Appendices C-F, and the checklist). Entries with src: 'new' were added
-  // while drafting this page and are shown in pink until reviewed.
+  // Content. All questions, descriptions, and examples are taken from the
+  // paper (Sections 3-5, Appendices C-F, and the checklist). Entries marked
+  // src: 'new' / yesRuleNew were added while drafting this page and are shown
+  // in pink until reviewed.
   // ------------------------------------------------------------------
   const PART_A = ['A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8'];
   const PART_B = ['SV', 'IV', 'EV', 'CV'];
   const STRATEGY = {
     A2: 'proxy models', A3: 'proxy treatments', A4: 'proxy outcomes', A5: 'observational data',
     A6: 'units within a single run', A7: 'theoretical controls', A8: 'other approximations'
+  };
+  const QUESTIONS_A = {
+    A2: { q: 'Do the experiments involve proxy models?',
+          desc: 'A proxy model is a model that is smaller or cheaper to train than the target models the claims are about, and that stands in for them in the experiment.',
+          example: '1B models standing in for 32B models; a series of small models fitted with a scaling law to predict behavior at a larger size.' },
+    A3: { q: 'Do the experiments involve proxy treatments?',
+          desc: 'A proxy treatment replaces the treatment the paper cares about with a cheaper stand-in, or only observes a proxy of it instead of implementing it.',
+          example: 'Fine-tuning on private data instead of pre-training on it; per-domain loss as a stand-in for the true data-mixture weights.' },
+    A4: { q: 'Do the experiments involve proxy outcomes?',
+          desc: 'A proxy outcome replaces the outcome the paper cares about with a cheaper stand-in.',
+          example: '“Training loss” as stand-in for “benchmark score”; a small subset of benchmark questions as stand-in for the full benchmark.' },
+    A5: { q: 'Do the experiments involve observational data?',
+          desc: 'Data is experimental if the researchers decided which units receive the treatment (they ran the training runs, ablations, or sweeps themselves). It is observational if the runs already existed and someone else made those decisions, so the researchers did not control and do not know how the treatment was assigned.',
+          example: 'Relating recipe choices to benchmark scores across publicly released models; analyzing released checkpoints of an existing model suite; using leaderboards or model cards.' },
+    A6: { q: 'Do the experiments treat elements of a single training run as independent units?',
+          desc: 'This strategy emulates two or more training runs from a single run: elements of the run (documents, tokens, subwords, …) are treated as independently treatable units, each with its own treatment status and outcome.',
+          example: 'Documents in the training set form the treatment group, held-out documents the control group, and the model’s loss on each document is its outcome.' },
+    A7: { q: 'Do the experiments use theoretical controls?',
+          desc: 'A theoretical control is an outcome that was not measured but computed from theory: the paper analytically approximates what the outcome would have been under the treatment or under the control, and compares against that.',
+          example: 'Influence functions analytically approximating “what if this data point were not in the training data”; canary data with known statistical properties injected into training, so that the control outcome follows from the distribution of the canaries.' },
+    A8: { q: 'Do the experiments involve other approximations?',
+          desc: 'Any way in which the design deviates from the ideal experiment that is not covered by A2 to A7.',
+          example: 'Measuring the outcome only at coarse checkpoint intervals; analyzing a subsample of the units.' }
   };
   const VALIDITY = {
     SV: {
@@ -352,30 +268,105 @@
       desc: 'Observational analysis per se does not threaten construct validity, but the treatment and outcome of interest are often not documented. If the analysis falls back on proxies, it inherits their threats: answer A3 or A4 with [Yes]. Example: per-domain loss as a stand-in for the true data-mixture weights.' }
   ];
 
+
   // ------------------------------------------------------------------
-  const STORAGE_KEY = 'fmr-checklist-v2';
+  // Glossary: terms that the checklist defines, shown on hover.
+  // Definitions are taken from the checklist and the glossary of the paper.
+  // ------------------------------------------------------------------
+  const GLOSSARY = {
+    'treatment': 'The change to the training process or data whose effect the paper wants to know (e.g., adding math data to the pre-training mix, lowering the learning rate, including a document in the training set).',
+    'control': 'The same setup without the treatment.',
+    'outcome': 'The property measured to see the effect (e.g., a benchmark score, the training loss, how well a document is memorized).',
+    'target models': 'The models the paper’s conclusions are about. They may be larger, or trained differently, than the models the paper actually trains.',
+    'unit': 'The thing that does or does not receive the treatment and on which the outcome is measured. Usually a unit is one training run; in some designs it is a document, token, or subword within one run.',
+    'treatment group': 'The units with the treatment.',
+    'control group': 'The units without the treatment.',
+    'training recipe': 'All controllable parts of training (architecture, optimizer, learning-rate schedule, training data, random seeds, …): everything required to replicate an individual training run.',
+    'model family': 'Models sharing central parts of their training recipe form a family.',
+    'proxy model': 'A model that is smaller or cheaper to train than the target models the claims are about, and that stands in for them in the experiment.',
+    'proxy treatment': 'A cheaper stand-in for the treatment the paper cares about, or a proxy of it that is only observed instead of implemented.',
+    'proxy outcome': 'A cheaper stand-in for the outcome the paper cares about.',
+    'scaling law': 'A parametric function fitted to the outcomes or treatment effects of several proxy models of increasing scale, and used to predict the outcome or effect at the target scale.',
+    'observational data': 'Data from training runs that already existed and whose treatment assignment was decided by someone else, so the researchers did not control and do not know how the treatment was assigned.',
+    'theoretical control': 'A control outcome that was not measured but computed from theory: an analytical approximation of what the outcome would have been under the treatment or under the control.',
+    'canary': 'Data with known statistical properties injected into training; the control outcome then follows from the distribution of the canaries.',
+    'influence functions': 'Analytical approximations of the contribution of individual training examples to a prediction; they replace the effect of removing one data point with the effect of reducing its weight.',
+    'exchangeability': 'Treatment and control groups do not differ systematically in anything other than the treatment.',
+    'conditional exchangeability': 'The groups are comparable once the measured confounders are held fixed.',
+    'confounder': 'A third factor that influences both which units get the treatment and their outcome.',
+    'selection bias': 'Units enter the sample in a way that depends on treatment and outcome, e.g., only the best-performing models are published.',
+    'positivity': 'Every treatment value the paper draws conclusions about occurs in the sample, among otherwise comparable units.',
+    'SUTVA': 'Stable unit treatment value assumption: no interference between units, and consistency between observed and potential outcomes.',
+    'interference': 'A unit’s outcome depends on the treatments other units received, not only on its own treatment.',
+    'consistency': 'The treatment is well defined, that is, all treated units received the same version of it, so the observed outcome is the outcome of the treatment the paper names.',
+    'potential outcome': 'The outcome a unit would have under a given treatment, whether or not it actually received it.',
+    'identifying assumptions': 'The assumptions under which an association between treatment and outcome is a causal effect: exchangeability, positivity, and SUTVA, or the assumptions of another identification strategy.',
+    'difference-in-differences': 'Comparing the change over time in treated units to that in untreated units.',
+    'parallel trends': 'Treated and untreated units would have developed alike without the treatment; the assumption behind difference-in-differences.',
+    'regression discontinuity': 'Treatment is determined by a cutoff; potential outcomes are assumed to vary continuously across it, so units just above and below the cutoff are exchangeable in the limit.',
+    'operationalization': 'The concrete implementation of a concept (fine-tuning on private data for “pre-training on private data”; one benchmark score for “reasoning ability”).',
+    'effect heterogeneity': 'Individual units or subgroups react differently to the treatment, so an average effect can hide the effect for particular units.',
+    'statistical validity': 'Whether the estimate from a finite, noisy sample reliably reflects the underlying quantity.',
+    'internal validity': 'Whether a reliable estimate reflects a genuine causal effect of the treatment, rather than some other difference between the compared groups or an influence of the units on each other.',
+    'external validity': 'Whether a correctly measured causal effect carries over from the setting in which it was measured to the setting the claims are about.',
+    'construct validity': 'Whether the treatment as implemented and the outcome as measured really capture the concepts named in the research question.'
+  };
+  // Patterns, specific ones first; each maps to a glossary key.
+  const TERM_PATTERNS = [
+    ['conditional exchangeability', 'conditional exchangeability'], ['difference-in-differences', 'difference-in-differences'],
+    ['regression discontinuity', 'regression discontinuity(?: designs?)?'], ['parallel trends', 'parallel(?: outcome)? trends'],
+    ['identifying assumptions', 'identifying assumptions?'], ['effect heterogeneity', 'effect heterogeneity'],
+    ['statistical validity', 'statistical validity'], ['internal validity', 'internal validity'],
+    ['external validity', 'external validity'], ['construct validity', 'construct validity'],
+    ['theoretical control', 'theoretical controls?'], ['proxy treatment', 'proxy treatments?'], ['proxy outcome', 'proxy outcomes?'],
+    ['proxy model', 'proxy models?'], ['target models', 'target models?'], ['treatment group', 'treatment groups?'],
+    ['control group', 'control groups?'], ['training recipe', '(?:training )?recipes?'], ['model family', 'model famil(?:y|ies)'],
+    ['potential outcome', 'potential outcomes?'], ['scaling law', 'scaling laws?'], ['observational data', 'observational(?: data)?'],
+    ['influence functions', 'influence functions?'], ['canary', 'canar(?:y|ies)'], ['selection bias', 'selection bias'],
+    ['confounder', 'confounders?|confounding|confounded'], ['exchangeability', 'exchangeab(?:ility|le)'],
+    ['positivity', 'positivity'], ['SUTVA', 'SUTVA'], ['interference', '(?:no )?interference'], ['consistency', 'consistency'],
+    ['operationalization', 'operationalization'], ['unit', 'units?'], ['outcome', 'outcomes?'], ['treatment', 'treatments?'],
+    ['control', 'controls?']
+  ];
+  const TERM_RE = new RegExp('\\b(?:' + TERM_PATTERNS.map((t, i) => '(?<t' + i + '>' + t[1] + ')').join('|') + ')\\b', 'gi');
+  let seenTerms = new Set();
+  function wrapTerms(html) {
+    // Marks the first occurrence of each term on the current screen; skips text inside tags.
+    return html.split(/(<[^>]+>)/).map((part) => {
+      if (part.startsWith('<')) return part;
+      return part.replace(TERM_RE, (m, ...rest) => {
+        const groups = rest[rest.length - 1];
+        const i = Object.keys(groups).findIndex((k) => groups[k] !== undefined);
+        const key = TERM_PATTERNS[i][0];
+        if (seenTerms.has(key)) return m;
+        seenTerms.add(key);
+        return '<span class="term" tabindex="0" data-term="' + key + '">' + m + '</span>';
+      });
+    }).join('');
+  }
+  const T = (text) => wrapTerms(esc(text));
+
+  // ------------------------------------------------------------------
+  // State
+  // ------------------------------------------------------------------
+  const STORAGE_KEY = 'fmr-checklist-v3';
+  const state = { step: 'intro', discussed: {}, A8types: [] };
   const $ = (sel, root) => (root || document).querySelector(sel);
   const $$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
-  const state = { discussed: {} }; // discussed[threatId] = true/false; the rest is read from the form
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* unavailable */ } }
+  function load() { try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) Object.assign(state, JSON.parse(raw)); } catch (e) { /* ignore */ } }
+  const val = (k) => state[k] || '';
 
-  function answer(id) { const r = $('input[name="' + id + '"]:checked'); return r ? r.value : ''; }
-  function setAnswer(id, v) { $$('input[name="' + id + '"]').forEach((r) => { r.checked = (r.value === v); }); }
-  function field(name) { const el = $('[name="' + name + '"]'); return el ? el.value : ''; }
-  function setField(name, v) { const el = $('[name="' + name + '"]'); if (el) el.value = v || ''; }
-  function checked(name) { const el = $('input[name="' + name + '"]'); return !!(el && el.checked); }
-  function setChecked(name, v) { const el = $('input[name="' + name + '"]'); if (el) el.checked = !!v; }
-  function title(id) { const h = $('#' + id + ' h3'); return h ? h.textContent.replace(/\s+/g, ' ').trim().replace(/^([A-Z0-9]+\.)(\S)/, '$1 $2') : id; }
-  function escapeHtml(s) { return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
-
-  function a8Types() { return PART_B.filter((t) => answer('A8') === 'Yes' && checked('A8-' + t)); }
-
-  // Threats of a validity type that apply given the Part A answers.
+  // ------------------------------------------------------------------
+  // The graph: which threats apply, given the Part A answers.
+  // ------------------------------------------------------------------
   function applicable(type) {
-    const items = THREATS.filter((t) => t.type === type && (t.triggers.includes('*') || t.triggers.some((a) => answer(a) === 'Yes')))
-      .map((t) => Object.assign({}, t, { via: t.triggers.filter((a) => a !== '*' && answer(a) === 'Yes') }));
-    if (a8Types().includes(type)) {
+    const items = THREATS.filter((t) => t.type === type && (t.triggers.includes('*') || t.triggers.some((a) => val(a) === 'Yes')))
+      .map((t) => Object.assign({}, t, { via: t.triggers.filter((a) => a !== '*' && val(a) === 'Yes') }));
+    if (val('A8') === 'Yes' && state.A8types.includes(type)) {
       items.push({ id: 'A8-' + type, type: type, triggers: ['A8'], via: ['A8'], name: 'Other approximation (A8)',
-                   desc: field('A8-just') || 'The approximation described in A8.', examples: [] });
+                   desc: val('A8-just') || 'The approximation described in A8.', examples: [] });
     }
     return items;
   }
@@ -384,138 +375,160 @@
     applicable(type).forEach((t) => { if (!t.note) t.via.forEach((a) => set.add(a)); });
     return Array.from(set);
   }
-
-  // Under each Part A question: which threats a [Yes] makes applicable.
-  function renderRoutes() {
-    PART_A.forEach((a) => {
-      const el = $('[data-routes="' + a + '"]');
-      if (!el) return;
-      const byType = {};
-      THREATS.filter((t) => t.triggers.includes(a) && !t.note).forEach((t) => { (byType[t.type] = byType[t.type] || []).push(t.name); });
-      const parts = Object.keys(byType).map((ty) => '<b>' + VALIDITY[ty].name.toLowerCase() + '</b> (' + byType[ty].map((n) => n.toLowerCase()).join('; ') + ')');
-      el.innerHTML = parts.length ? 'If [Yes], the paper has to discuss the threats to ' + parts.join(', ') + '; [NA] is then not allowed for ' + Object.keys(byType).join(', ') + '.' : '';
-    });
+  function routesText(a) {
+    const byType = {};
+    THREATS.filter((t) => t.triggers.includes(a) && !t.note).forEach((t) => { (byType[t.type] = byType[t.type] || []).push(t.name); });
+    const keys = Object.keys(byType);
+    if (!keys.length) return '';
+    return 'If [Yes], the paper has to discuss the threats to ' +
+      keys.map((ty) => '<b>' + VALIDITY[ty].name.toLowerCase() + '</b> (' + byType[ty].map((n) => n.toLowerCase()).join('; ') + ')').join(', ') +
+      '; [NA] is then not allowed for ' + keys.join(', ') + '.';
   }
 
-  function renderPartB() {
-    const root = $('#partB');
-    root.innerHTML = '';
+  // ------------------------------------------------------------------
+  // Steps: one screen each.
+  // ------------------------------------------------------------------
+  function steps() {
+    const list = [{ id: 'intro' }, { id: 'A1' }];
+    PART_A.forEach((a) => list.push({ id: a }));
     PART_B.forEach((type) => {
-      const v = VALIDITY[type];
-      const items = applicable(type);
-      const via = triggersOf(type);
-      const active = type === 'SV' || via.length > 0;
-      const sec = document.createElement('section');
-      sec.className = 'q';
-      sec.id = 'B-' + type;
-      let html = '<h3><span class="qid">' + type + '.</span>' + v.name + '</h3>';
-      if (type === 'SV') {
-        html += '<p class="status on">Applies to all papers.</p>';
-      } else if (active) {
-        html += '<p class="status on">Applicable, because ' + via.map((a) => a + ' = Yes (' + STRATEGY[a] + ')').join(', ') + '. [NA] is not allowed.</p>';
-      } else {
-        html += '<p class="status">None of the strategies selected in Part A makes this applicable. ' + escapeHtml(v.naMeans) + '</p>';
-      }
-      html += '<p class="desc"><strong>Question:</strong> ' + escapeHtml(v.question) + '</p>';
-      items.forEach((t) => {
-        if (t.note) {
-          html += '<div class="threat note"><h4>' + escapeHtml(t.name) + ' <span class="tag">' + t.via.join(', ') + '</span></h4><p class="desc">' + escapeHtml(t.desc) + '</p></div>';
-          return;
-        }
-        const tagHtml = t.via.length ? ' <span class="tag">' + t.via.join(', ') + '</span>' : '';
-        html += '<div class="threat"><h4>' + escapeHtml(t.name) + tagHtml + '</h4>';
-        html += '<p class="desc">' + escapeHtml(t.desc) + '</p>';
-        (t.examples || []).forEach((ex) => {
-          html += '<p class="example' + (ex.src === 'new' ? ' new' : '') + '"><strong>Example:</strong> ' + escapeHtml(ex.text) + '</p>';
-        });
-        html += '<label class="discussed"><input type="checkbox" data-discussed="' + t.id + '"' + (state.discussed[t.id] ? ' checked' : '') + '> Properly discussed in the paper</label>';
-        html += '</div>';
-      });
-      html += '<p class="' + (v.yesRuleNew ? 'new' : 'muted') + ' desc">' + escapeHtml(v.yesRule) + '</p>';
-      html += '<p class="suggest" data-suggest="' + type + '"></p>';
-      html += '<div class="answer">';
-      ['Yes', 'No'].concat(v.allowNA ? ['NA'] : []).forEach((opt) => {
-        const off = (opt === 'NA' && active);
-        html += '<label' + (off ? ' class="off"' : '') + '><input type="radio" name="' + type + '" value="' + opt + '"' + (off ? ' disabled' : '') + '> ' + opt + '</label>';
-      });
-      html += '</div>';
-      html += '<label class="field"><span>Justification</span><textarea name="' + type + '-just" rows="3"></textarea></label>';
-      sec.innerHTML = html;
-      root.appendChild(sec);
-    });
-  }
-
-  function updateSuggestions() {
-    PART_B.forEach((type) => {
-      const el = $('[data-suggest="' + type + '"]');
-      if (!el) return;
       const items = applicable(type).filter((t) => !t.note);
-      const open = items.filter((t) => !state.discussed[t.id]);
-      el.className = 'suggest';
-      if (!items.length) { el.textContent = ''; return; }
-      if (!open.length) { el.classList.add('yes'); el.textContent = 'All applicable threats are checked as discussed, which supports a [Yes].'; }
-      else {
-        const names = [];
-        open.forEach((t) => { const n = t.name.toLowerCase() + (t.via.length ? ' (' + t.via.join(', ') + ')' : ''); if (!names.includes(n)) names.push(n); });
-        el.classList.add('no'); el.textContent = 'Not yet checked as discussed: ' + names.join('; ') + '. If the paper leaves any of them undiscussed, answer [No] and name it.';
-      }
+      items.forEach((t, i) => list.push({ id: 'T:' + t.id, type: type, threat: t, n: i + 1, of: items.length }));
+      list.push({ id: 'B:' + type, type: type });
     });
+    list.push({ id: 'summary' });
+    return list;
+  }
+  function currentIndex(list) {
+    let i = list.findIndex((s) => s.id === state.step);
+    if (i < 0) { i = Math.min(state.stepIndex || 0, list.length - 1); state.step = list[i].id; }
+    return i;
   }
 
-  function chip(label, cls) { const s = document.createElement('span'); s.className = 'chip ' + cls; s.textContent = label; return s; }
-  function updateSummary() {
-    const a = $('#summary-a'); a.innerHTML = '';
-    PART_A.forEach((id) => { const v = answer(id); a.appendChild(chip(id + ' ' + (v || '—'), v === 'Yes' ? 'used' : v === 'No' ? '' : 'open')); });
-    const b = $('#summary-b'); b.innerHTML = '';
-    PART_B.forEach((id) => { const v = answer(id); b.appendChild(chip(id + ' ' + (v || '—'), v ? v.toLowerCase() : 'open')); });
+  // ------------------------------------------------------------------
+  // Screens
+  // ------------------------------------------------------------------
+  function radios(name, options, disabled) {
+    return '<div class="answer">' + options.map((o) => {
+      const off = (disabled || []).includes(o.value);
+      return '<label' + (off ? ' class="off"' : '') + '><input type="radio" name="' + name + '" value="' + o.value + '"' +
+        (val(name) === o.value ? ' checked' : '') + (off ? ' disabled' : '') + '> ' + esc(o.label || o.value) + '</label>';
+    }).join('') + '</div>';
+  }
+  function textarea(name, label, rows) {
+    return '<label class="field"><span>' + T(label) + '</span><textarea name="' + name + '" rows="' + (rows || 3) + '">' + esc(val(name)) + '</textarea></label>';
   }
 
-  // ---------------- state ----------------
-  function collect() {
-    const s = { paper: field('paper'), 'A1-rq': field('A1-rq'), 'A1-concl': field('A1-concl'), discussed: state.discussed, A8types: a8Types() };
-    PART_A.concat(PART_B).forEach((id) => { s[id] = answer(id); s[id + '-just'] = field(id + '-just'); });
-    return s;
+  function screenIntro() {
+    return '<h1>Validity Checklist for Foundation Model Research</h1>' +
+      '<p class="muted">Controlled experiments at the scale of modern foundation models have become prohibitively expensive. Instead, research relies on strategies that approximate the ideal experiment at a fraction of the cost: proxy experiments and scaling laws, observational studies with publicly available models, and single-run designs that leverage variation within individual training runs. Each strategy replaces parts of the ideal experiment with cheaper substitutes and thereby makes implicit assumptions. This checklist helps authors and reviewers identify them.</p>' +
+      '<ul>' +
+      '<li><strong>Part A</strong> states the research question and identifies the approximation strategies of the experiment.</li>' +
+      '<li><strong>Part B</strong> asks, for each of the four types of validity, whether the paper <em>properly discusses</em> the threats to it: names them and argues them away, tests them, bounds them, or limits its claims accordingly. It does not ask whether the assumptions hold. A [No] is not disqualifying; it flags threats the paper should discuss. Only the threats that follow from the answers in Part A are asked about.</li>' +
+      '<li><strong>Answers</strong> are [Yes] / [No], and [NA] where the design allows it. [NA] means the threat cannot arise in this design. If it is applicable but undiscussed, answer [No].</li>' +
+      '<li><strong>Justification:</strong> one or two sentences pointing to the supporting section, quote, or figure.</li>' +
+      '</ul>' +
+      '<p class="new">Text in this color was added while drafting this page and is not taken from the paper; it still has to be reviewed.</p>' +
+      '<label class="field"><span>Paper (authors, title, venue, year)</span><input type="text" name="paper" autocomplete="off" value="' + esc(val('paper')) + '"></label>';
   }
-  function restore(s) {
-    setField('paper', s.paper); setField('A1-rq', s['A1-rq']); setField('A1-concl', s['A1-concl']);
-    PART_A.forEach((id) => { setAnswer(id, s[id] || ''); setField(id + '-just', s[id + '-just']); });
-    PART_B.forEach((t) => setChecked('A8-' + t, (s.A8types || []).includes(t)));
-    state.discussed = s.discussed || {};
-    renderPartB();
-    PART_B.forEach((id) => { setAnswer(id, s[id] || ''); setField(id + '-just', s[id + '-just']); });
+  function screenA1() {
+    return '<p class="kicker">Part A · Question 1 of 8</p><h2>A1. What is the research question?</h2>' +
+      '<p class="muted">Hover over an underlined term for its definition.</p>' +
+      textarea('A1-rq', 'Research question: one sentence naming treatment, outcome, and target models', 3) +
+      textarea('A1-concl', 'Conclusions: the main conclusions the paper draws from this experiment; Part B refers back to them', 3) +
+      '<p class="example"><strong>Example:</strong> How does the MMLU benchmark score (outcome) of Olmo 3 32B (target model) change when we remove all math competition data from its pretraining data (treatment)?</p>';
   }
-  function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(collect())); } catch (e) { /* storage unavailable */ } }
-  function load() { try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) { restore(JSON.parse(raw)); return true; } } catch (e) { /* ignore */ } return false; }
+  function screenA(a) {
+    const q = QUESTIONS_A[a];
+    const n = PART_A.indexOf(a) + 2;
+    let html = '<p class="kicker">Part A · Question ' + n + ' of 8</p><h2>' + a + '. ' + esc(q.q) + '</h2>' +
+      '<p>' + T(q.desc) + '</p><p class="example"><strong>Example:</strong> ' + T(q.example) + '</p>' +
+      radios(a, [{ value: 'Yes', label: a === 'A8' ? 'Yes' : 'Yes' }, { value: 'No' }]);
+    if (a === 'A8') {
+      html += '<div id="A8-more"' + (val('A8') === 'Yes' ? '' : ' hidden') + '>' + textarea('A8-just', 'Description of the approximation', 2) +
+        '<p class="routes">Name the validity types that the approximation threatens; [NA] is then not allowed for those questions.</p><div class="types">' +
+        PART_B.map((t) => '<label><input type="checkbox" name="A8-' + t + '"' + (state.A8types.includes(t) ? ' checked' : '') + '> ' + VALIDITY[t].name + '</label>').join('') + '</div></div>';
+    } else {
+      html += textarea(a + '-just', 'Justification', 2) + '<p class="routes">' + routesText(a) + '</p>';
+    }
+    return html;
+  }
+  function screenThreat(step) {
+    const t = step.threat; const v = VALIDITY[step.type];
+    let html = '<p class="kicker">Part B · ' + esc(v.name) + ' · Threat ' + step.n + ' of ' + step.of +
+      (t.via.length ? ' · from ' + t.via.map((a) => a + ' (' + STRATEGY[a] + ')').join(', ') : ' · all papers') + '</p>' +
+      '<h2>' + esc(t.name) + '</h2><p>' + T(t.desc) + '</p>';
+    (t.examples || []).forEach((ex) => { html += '<p class="example' + (ex.src === 'new' ? ' new' : '') + '"><strong>Example:</strong> ' + T(ex.text) + '</p>'; });
+    html += '<h3>Does the paper properly discuss this threat?</h3>' +
+      '<p class="muted" style="font-size:.95rem;margin-top:0">Properly discussed means: named and argued away, tested, bounded, or the claims are limited accordingly.</p>' +
+      '<div class="answer">' + [['yes', 'Yes'], ['no', 'No']].map(([v2, l]) =>
+        '<label><input type="radio" name="disc" value="' + v2 + '"' + (state.discussed[t.id] === (v2 === 'yes') ? ' checked' : '') + '> ' + l + '</label>').join('') + '</div>';
+    return html;
+  }
+  function screenB(type) {
+    const v = VALIDITY[type];
+    const items = applicable(type);
+    const threats = items.filter((t) => !t.note);
+    const notes = items.filter((t) => t.note);
+    const via = triggersOf(type);
+    const active = type === 'SV' || via.length > 0;
+    let html = '<p class="kicker">Part B · ' + esc(v.name) + ' · Answer</p><h2>' + type + '. ' + esc(v.name) + '</h2>';
+    if (type === 'SV') html += '<p class="status on">Applies to all papers.</p>';
+    else if (active) html += '<p class="status on">Applicable, because ' + via.map((a) => a + ' = Yes (' + STRATEGY[a] + ')').join(', ') + '. [NA] is not allowed.</p>';
+    else html += '<p class="status">None of the strategies selected in Part A makes this applicable. ' + T(v.naMeans) + '</p>';
+    html += '<p><strong>Question:</strong> ' + T(v.question) + '</p>';
+    if (threats.length) {
+      const undisc = threats.filter((t) => state.discussed[t.id] !== true);
+      const names = [];
+      undisc.forEach((t) => { const n = t.name.toLowerCase() + (t.via.length ? ' (' + t.via.join(', ') + ')' : ''); if (!names.includes(n)) names.push(n); });
+      html += undisc.length
+        ? '<p class="suggest no">Not marked as properly discussed: ' + esc(names.join('; ')) + '. If the paper leaves any of them undiscussed, answer [No] and name it.</p>'
+        : '<p class="suggest yes">All ' + threats.length + ' applicable threats are marked as properly discussed, which supports a [Yes].</p>';
+    }
+    html += '<p class="' + (v.yesRuleNew ? 'new' : 'muted') + '" style="font-size:.95rem">' + T(v.yesRule) + '</p>';
+    notes.forEach((t) => { html += '<p class="note"><strong>' + esc(t.name) + '</strong> (' + t.via.join(', ') + '): ' + T(t.desc) + '</p>'; });
+    html += radios(type, ['Yes', 'No'].concat(v.allowNA ? ['NA'] : []).map((o) => ({ value: o })), active ? ['NA'] : []);
+    html += textarea(type + '-just', 'Justification', 3);
+    return html;
+  }
+  function chip(label, cls, step) { return '<button type="button" class="chip ' + cls + '" data-go="' + step + '">' + esc(label) + '</button>'; }
+  function screenSummary() {
+    let html = '<p class="kicker">Summary</p><h2>' + (val('paper') ? esc(val('paper')) : 'Validity checklist') + '</h2>' +
+      '<p class="muted">Approximation strategies (Part A); click a chip to go back to that question.</p><div class="chips">' +
+      PART_A.map((a) => chip(a + ' ' + (val(a) || '—'), val(a) === 'Yes' ? 'used' : val(a) === 'No' ? '' : 'open', a)).join('') + '</div>' +
+      '<p class="muted">Validity threats properly discussed (Part B)</p><div class="chips">' +
+      PART_B.map((t) => chip(t + ' ' + (val(t) || '—'), val(t) ? val(t).toLowerCase() : 'open', 'B:' + t)).join('') + '</div>' +
+      '<div class="toolbar"><button type="button" class="primary" id="copy-md">Copy as Markdown</button>' +
+      '<button type="button" id="download-md">Download Markdown</button><button type="button" id="download-json">Download JSON</button>' +
+      '<button type="button" id="print">Print</button><button type="button" id="reset">Start over</button></div>' +
+      '<pre class="export">' + esc(markdown()) + '</pre>';
+    return html;
+  }
 
-  // Re-render Part B when Part A changes, keeping the Part B answers.
-  function rebuildPartB() {
-    const keep = {};
-    PART_B.forEach((id) => { keep[id] = answer(id); keep[id + '-just'] = field(id + '-just'); });
-    renderPartB();
-    PART_B.forEach((id) => { setAnswer(id, keep[id]); setField(id + '-just', keep[id + '-just']); });
-    // A disabled [NA] cannot stay selected.
-    PART_B.forEach((id) => { const na = $('input[name="' + id + '"][value="NA"]'); if (na && na.disabled && keep[id] === 'NA') setAnswer(id, ''); });
-  }
-
-  // ---------------- export ----------------
+  // ------------------------------------------------------------------
+  // Export
+  // ------------------------------------------------------------------
   function markdown() {
-    const s = collect();
     const L = [];
-    L.push('# Validity checklist', '', '**Paper:** ' + (s.paper || '…'), '');
+    L.push('# Validity checklist', '', '**Paper:** ' + (val('paper') || '…'), '');
     L.push('## Part A — Research question and approximation strategies', '');
-    L.push('**A1. What is the research question?**', '', 'Research question: ' + (s['A1-rq'] || '…'), '', 'Conclusions: ' + (s['A1-concl'] || '…'), '');
-    PART_A.forEach((id) => {
-      L.push('**' + title(id) + '** [' + (s[id] || '…') + ']' + (id === 'A8' && a8Types().length ? ' — threatens: ' + a8Types().join(', ') : ''), '');
-      L.push('Justification: ' + (s[id + '-just'] || '…'), '');
+    L.push('**A1. What is the research question?**', '', 'Research question: ' + (val('A1-rq') || '…'), '', 'Conclusions: ' + (val('A1-concl') || '…'), '');
+    PART_A.forEach((a) => {
+      L.push('**' + a + '. ' + QUESTIONS_A[a].q + '** [' + (val(a) || '…') + ']' + (a === 'A8' && val('A8') === 'Yes' && state.A8types.length ? ' — threatens: ' + state.A8types.join(', ') : ''), '');
+      L.push((a === 'A8' ? 'Description: ' : 'Justification: ') + (val(a + '-just') || '…'), '');
     });
     L.push('## Part B — Validity', '');
     PART_B.forEach((type) => {
       const items = applicable(type).filter((t) => !t.note);
       const via = triggersOf(type);
-      L.push('**' + type + '. ' + VALIDITY[type].name + '** [' + (s[type] || '…') + ']' + (type !== 'SV' ? (via.length ? ' — applicable because ' + via.join(', ') + ' = Yes' : ' — not applicable for the selected strategies') : ''), '');
-      items.forEach((t) => L.push('- [' + (state.discussed[t.id] ? 'x' : ' ') + '] ' + t.name + (t.via.length ? ' (' + t.via.join(', ') + ')' : '')));
+      L.push('**' + type + '. ' + VALIDITY[type].name + '** [' + (val(type) || '…') + ']' +
+        (type !== 'SV' ? (via.length ? ' — applicable because ' + via.join(', ') + ' = Yes' : ' — not applicable for the selected strategies') : ''), '');
+      items.forEach((t) => {
+        const d = state.discussed[t.id];
+        L.push('- [' + (d === true ? 'x' : ' ') + '] ' + t.name + (t.via.length ? ' (' + t.via.join(', ') + ')' : '') + (d === false ? ' — not discussed' : d === undefined ? ' — not assessed' : ''));
+      });
       if (items.length) L.push('');
-      L.push('Justification: ' + (s[type + '-just'] || '…'), '');
+      L.push('Justification: ' + (val(type + '-just') || '…'), '');
     });
     L.push('_Filled with the validity checklist at https://fmr-checklist.github.io/_');
     return L.join('\n');
@@ -527,43 +540,111 @@
   }
   function msg(text) { const el = $('#msg'); el.textContent = text; setTimeout(() => { if (el.textContent === text) el.textContent = ''; }, 3000); }
 
-  function refresh() {
-    $('#A8-types').hidden = (answer('A8') !== 'Yes');
-    updateSuggestions();
-    updateSummary();
-    $('#preview').textContent = markdown();
+  // ------------------------------------------------------------------
+  // Rendering and navigation
+  // ------------------------------------------------------------------
+  function render() {
+    seenTerms = new Set();
+    const list = steps();
+    const i = currentIndex(list);
+    state.stepIndex = i;
+    const step = list[i];
+    let html;
+    if (step.id === 'intro') html = screenIntro();
+    else if (step.id === 'A1') html = screenA1();
+    else if (PART_A.includes(step.id)) html = screenA(step.id);
+    else if (step.id.startsWith('T:')) html = screenThreat(step);
+    else if (step.id.startsWith('B:')) html = screenB(step.type);
+    else html = screenSummary();
+    $('#screen').innerHTML = html;
+    $('#progress-label').textContent = step.id === 'intro' ? '' : step.id === 'summary' ? 'Done' : 'Step ' + i + ' of ' + (list.length - 2);
+    $('#progress-bar').style.width = Math.round(100 * i / (list.length - 1)) + '%';
+    $('#back').disabled = (i === 0);
+    $('#next').textContent = step.id === 'intro' ? 'Start' : step.id === 'summary' ? 'Review from the start' : (i === list.length - 2 ? 'Finish' : 'Next');
+    $('#foot').hidden = !(step.id === 'intro' || step.id === 'summary');
+    window.scrollTo(0, 0);
+    const first = $('#screen input[type=text], #screen textarea');
+    if (first && step.id === 'intro') first.focus();
     save();
   }
+  function go(delta) {
+    const list = steps();
+    const i = currentIndex(list);
+    const j = Math.max(0, Math.min(list.length - 1, i + delta));
+    state.step = list[j].id;
+    render();
+  }
+  function goTo(id) { state.step = id; render(); }
 
-  document.addEventListener('change', (ev) => {
+  $('#back').addEventListener('click', () => go(-1));
+  $('#next').addEventListener('click', () => {
+    const list = steps();
+    if (list[currentIndex(list)].id === 'summary') goTo('intro'); else go(1);
+  });
+
+  // Inputs on the current screen write to the state.
+  $('#screen').addEventListener('input', (ev) => {
     const el = ev.target;
-    if (el.dataset && el.dataset.discussed) { state.discussed[el.dataset.discussed] = el.checked; }
-    else if (PART_A.includes(el.name) || /^A8-/.test(el.name)) { rebuildPartB(); }
-    refresh();
+    if (el.name && (el.type === 'text' || el.tagName === 'TEXTAREA')) { state[el.name] = el.value; save(); }
   });
-  document.addEventListener('input', (ev) => {
-    if (ev.target.name === 'A8-just' && a8Types().length) { rebuildPartB(); }
-    refresh();
+  $('#screen').addEventListener('change', (ev) => {
+    const el = ev.target;
+    if (el.type === 'radio' && el.name === 'disc') {
+      const list = steps(); const step = list[currentIndex(list)];
+      state.discussed[step.threat.id] = (el.value === 'yes');
+    } else if (el.type === 'radio') {
+      state[el.name] = el.value;
+      if (el.name === 'A8') { const more = $('#A8-more'); if (more) more.hidden = (el.value !== 'Yes'); }
+    } else if (el.type === 'checkbox' && /^A8-/.test(el.name)) {
+      const t = el.name.slice(3);
+      state.A8types = PART_B.filter((x) => (x === t ? el.checked : state.A8types.includes(x)));
+    }
+    // A disabled [NA] cannot stay selected once a strategy makes the type applicable.
+    PART_B.forEach((type) => { if (state[type] === 'NA' && (type === 'SV' || triggersOf(type).length)) state[type] = ''; });
+    save();
+  });
+  $('#screen').addEventListener('click', async (ev) => {
+    const el = ev.target.closest('button'); if (!el) return;
+    if (el.dataset.go) { goTo(el.dataset.go); return; }
+    if (el.id === 'copy-md') { try { await navigator.clipboard.writeText(markdown()); msg('Copied to the clipboard.'); } catch (e) { msg('Clipboard unavailable; copy the text from the box.'); } }
+    else if (el.id === 'download-md') download('validity-checklist.md', markdown(), 'text/markdown');
+    else if (el.id === 'download-json') download('validity-checklist.json', JSON.stringify(state, null, 2), 'application/json');
+    else if (el.id === 'print') window.print();
+    else if (el.id === 'reset') {
+      if (!window.confirm('Clear all answers and start over?')) return;
+      Object.keys(state).forEach((k) => delete state[k]);
+      Object.assign(state, { step: 'intro', discussed: {}, A8types: [] });
+      try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignore */ }
+      render();
+    }
+  });
+  // Enter in a text field moves on; Shift+Enter inserts a line break in a textarea.
+  document.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter' && !ev.shiftKey && ev.target.tagName !== 'TEXTAREA' && ev.target.tagName !== 'BUTTON') { ev.preventDefault(); $('#next').click(); }
   });
 
-  $('#copy-md').addEventListener('click', async () => {
-    try { await navigator.clipboard.writeText(markdown()); msg('Copied to the clipboard.'); }
-    catch (e) { msg('Clipboard unavailable; the Markdown is shown below.'); }
-  });
-  $('#download-md').addEventListener('click', () => download('validity-checklist.md', markdown(), 'text/markdown'));
-  $('#download-json').addEventListener('click', () => download('validity-checklist.json', JSON.stringify(collect(), null, 2), 'application/json'));
-  $('#print').addEventListener('click', () => window.print());
-  $('#reset').addEventListener('click', () => {
-    if (!window.confirm('Clear all answers?')) return;
-    try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignore */ }
-    restore({ discussed: {} });
-    refresh();
-    msg('All answers cleared.');
-  });
+  // Tooltips for glossary terms (hover, keyboard focus, or tap).
+  const tip = $('#tip');
+  function showTip(el) {
+    tip.textContent = GLOSSARY[el.dataset.term] || '';
+    tip.hidden = false;
+    const r = el.getBoundingClientRect();
+    const w = Math.min(360, window.innerWidth - 24);
+    tip.style.width = w + 'px';
+    let left = r.left + window.scrollX;
+    if (r.left + w > window.innerWidth - 12) left = window.innerWidth - 12 - w + window.scrollX;
+    tip.style.left = Math.max(12, left) + 'px';
+    tip.style.top = (r.bottom + window.scrollY + 6) + 'px';
+  }
+  function hideTip() { tip.hidden = true; }
+  document.addEventListener('mouseover', (ev) => { const t = ev.target.closest && ev.target.closest('.term'); if (t) showTip(t); });
+  document.addEventListener('mouseout', (ev) => { const t = ev.target.closest && ev.target.closest('.term'); if (t) hideTip(); });
+  document.addEventListener('focusin', (ev) => { const t = ev.target.closest && ev.target.closest('.term'); if (t) showTip(t); });
+  document.addEventListener('focusout', (ev) => { const t = ev.target.closest && ev.target.closest('.term'); if (t) hideTip(); });
+  document.addEventListener('click', (ev) => { const t = ev.target.closest && ev.target.closest('.term'); if (t) { if (tip.hidden) showTip(t); else hideTip(); } else if (!tip.hidden) hideTip(); });
 
-  renderRoutes();
-  if (!load()) renderPartB();
-  refresh();
+  load();
+  render();
 })();
 </script>
 </body>
