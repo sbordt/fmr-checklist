@@ -104,25 +104,25 @@
     A6: 'units within a single run', A7: 'theoretical controls', A8: 'other approximations'
   };
   const QUESTIONS_A = {
-    A2: { which: 'Which parts of the experiments involve proxy models?', q: 'Do the experiments involve proxy models?',
+    A2: { which: 'Which experiments are performed with proxy models?', q: 'Does the paper perform experiments with proxy models?',
           desc: 'A proxy model is a model that is smaller or cheaper to train than the target models the claims are about, and that stands in for them in the experiment.',
           example: '1B models standing in for 32B models; a series of small models fitted with a scaling law to predict behavior at a larger size.' },
-    A3: { which: 'Which parts of the experiments involve proxy treatments?', q: 'Do the experiments involve proxy treatments?',
+    A3: { which: 'Which experiments are performed with proxy treatments?', q: 'Does the paper perform experiments with proxy treatments?',
           desc: 'A proxy treatment replaces the treatment the paper cares about with a cheaper stand-in, or only observes a proxy of it instead of implementing it.',
           example: 'Fine-tuning on private data instead of pre-training on it; per-domain loss as a stand-in for the true data-mixture weights.' },
-    A4: { which: 'Which parts of the experiments involve proxy outcomes?', q: 'Do the experiments involve proxy outcomes?',
+    A4: { which: 'Which proxy outcomes does the paper measure?', q: 'Does the paper measure proxy outcomes?',
           desc: 'A proxy outcome replaces the outcome the paper cares about with a cheaper stand-in.',
           example: '“Training loss” as stand-in for “benchmark score”; a small subset of benchmark questions as stand-in for the full benchmark.' },
-    A5: { which: 'Which parts of the experiments involve observational data?', q: 'Do the experiments involve observational data?',
+    A5: { which: 'Which conclusions are drawn from observational data?', q: 'Does the paper draw conclusions from observational data?',
           desc: 'Data is experimental if the researchers decided which units receive the treatment (they ran the training runs, ablations, or sweeps themselves). It is observational if the runs already existed and someone else made those decisions, so the researchers did not control and do not know how the treatment was assigned.',
           example: 'Relating recipe choices to benchmark scores across publicly released models; analyzing released checkpoints of an existing model suite; using leaderboards or model cards.' },
-    A6: { which: 'Which parts of the experiments treat elements of a single training run as independent units?', q: 'Do the experiments treat elements of a single training run as independent units?',
+    A6: { which: 'Which experiments treat elements of a single training run as independent units?', q: 'Does the paper perform experiments that treat elements of a single training run as independent units?',
           desc: 'This strategy emulates two or more training runs from a single run: elements of the run (documents, tokens, subwords, …) are treated as independently treatable units, each with its own treatment status and outcome.',
           example: 'Documents in the training set form the treatment group, held-out documents the control group, and the model’s loss on each document is its outcome.' },
-    A7: { which: 'Which parts of the experiments use theoretical controls?', q: 'Do the experiments use theoretical controls?',
+    A7: { which: 'Which experiments use theoretical controls?', q: 'Does the paper perform experiments that use theoretical controls?',
           desc: 'A theoretical control is an outcome that was not measured but computed from theory: the paper analytically approximates what the outcome would have been under the treatment or under the control, and compares against that.',
           example: 'Influence functions analytically approximating “what if this data point were not in the training data”; canary data with known statistical properties injected into training, so that the control outcome follows from the distribution of the canaries.' },
-    A8: { which: 'Which other approximations do the experiments involve?', q: 'Do the experiments involve other approximations?',
+    A8: { which: 'Which other approximations does the paper perform?', q: 'Does the paper perform other kinds of approximations?',
           desc: 'Any way in which the design deviates from the ideal experiment that is not covered by the questions above.',
           example: 'Measuring the outcome only at coarse checkpoint intervals; analyzing a subsample of the units.' }
   };
