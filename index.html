@@ -123,25 +123,25 @@
     A6: 'units within a single run', A7: 'theoretical controls', A8: 'other approximations'
   };
   const QUESTIONS_A = {
-    A2: { q: 'Do the experiments involve proxy models?',
+    A2: { which: 'Which parts of the experiments involve proxy models?', q: 'Do the experiments involve proxy models?',
           desc: 'A proxy model is a model that is smaller or cheaper to train than the target models the claims are about, and that stands in for them in the experiment.',
           example: '1B models standing in for 32B models; a series of small models fitted with a scaling law to predict behavior at a larger size.' },
-    A3: { q: 'Do the experiments involve proxy treatments?',
+    A3: { which: 'Which parts of the experiments involve proxy treatments?', q: 'Do the experiments involve proxy treatments?',
           desc: 'A proxy treatment replaces the treatment the paper cares about with a cheaper stand-in, or only observes a proxy of it instead of implementing it.',
           example: 'Fine-tuning on private data instead of pre-training on it; per-domain loss as a stand-in for the true data-mixture weights.' },
-    A4: { q: 'Do the experiments involve proxy outcomes?',
+    A4: { which: 'Which parts of the experiments involve proxy outcomes?', q: 'Do the experiments involve proxy outcomes?',
           desc: 'A proxy outcome replaces the outcome the paper cares about with a cheaper stand-in.',
           example: '“Training loss” as stand-in for “benchmark score”; a small subset of benchmark questions as stand-in for the full benchmark.' },
-    A5: { q: 'Do the experiments involve observational data?',
+    A5: { which: 'Which parts of the experiments involve observational data?', q: 'Do the experiments involve observational data?',
           desc: 'Data is experimental if the researchers decided which units receive the treatment (they ran the training runs, ablations, or sweeps themselves). It is observational if the runs already existed and someone else made those decisions, so the researchers did not control and do not know how the treatment was assigned.',
           example: 'Relating recipe choices to benchmark scores across publicly released models; analyzing released checkpoints of an existing model suite; using leaderboards or model cards.' },
-    A6: { q: 'Do the experiments treat elements of a single training run as independent units?',
+    A6: { which: 'Which parts of the experiments treat elements of a single training run as independent units?', q: 'Do the experiments treat elements of a single training run as independent units?',
           desc: 'This strategy emulates two or more training runs from a single run: elements of the run (documents, tokens, subwords, …) are treated as independently treatable units, each with its own treatment status and outcome.',
           example: 'Documents in the training set form the treatment group, held-out documents the control group, and the model’s loss on each document is its outcome.' },
-    A7: { q: 'Do the experiments use theoretical controls?',
+    A7: { which: 'Which parts of the experiments use theoretical controls?', q: 'Do the experiments use theoretical controls?',
           desc: 'A theoretical control is an outcome that was not measured but computed from theory: the paper analytically approximates what the outcome would have been under the treatment or under the control, and compares against that.',
           example: 'Influence functions analytically approximating “what if this data point were not in the training data”; canary data with known statistical properties injected into training, so that the control outcome follows from the distribution of the canaries.' },
-    A8: { q: 'Do the experiments involve other approximations?',
+    A8: { which: 'Which other approximations do the experiments involve?', q: 'Do the experiments involve other approximations?',
           desc: 'Any way in which the design deviates from the ideal experiment that is not covered by A2 to A7.',
           example: 'Measuring the outcome only at coarse checkpoint intervals; analyzing a subsample of the units.' }
   };
@@ -182,7 +182,7 @@
     { id: 'SV-noise', ask: 'noise from a finite sample', type: 'SV', triggers: ['*'], name: 'Noise and repeated experiments',
       desc: 'When you estimate an effect from a finite, noisy sample, it might not reliably measure the true underlying quantity. What would come out if the experiment were repeated? Does the paper report error bars and say which source of randomness they capture? Observed outcomes may vary due to random initialization, data ordering, sampled evaluation subset, and so on.',
       examples: [{ text: 'The difference between two different training recipes can be smaller than the seed-to-seed variation within one training recipe.' }] },
-    { id: 'SV-units', ask: 'a small number of units, or dependent units,', type: 'SV', triggers: ['*'], name: 'Few or dependent units',
+    { id: 'SV-units', ask: 'few or dependent units', type: 'SV', triggers: ['*'], name: 'Few or dependent units',
       desc: 'If the analysis relies on a few units, or units that are not independent, it makes the estimate less precise than what the raw sample count suggests.',
       examples: [{ text: 'Multiple fine-tunes of one base model are not independent units.' }] },
     { id: 'SV-best', ask: 'picking the best of many comparisons', type: 'SV', triggers: ['*'], name: 'Best of many comparisons',
@@ -351,7 +351,7 @@
       .map((t) => Object.assign({}, t, { via: t.triggers.filter((a) => a !== '*' && val(a) === 'Yes') }));
     if (val('A8') === 'Yes' && a8Types().includes(type)) {
       items.push({ id: 'A8-' + type, type: type, triggers: ['A8'], via: ['A8'], name: 'Other approximation (A8)',
-                   desc: val('A8-just') || 'The approximation described in A8.', examples: [] });
+                   desc: val('A8-which') || 'The approximation described in A8.', examples: [] });
     }
     return items;
   }
@@ -391,7 +391,7 @@
     const items = THREATS.filter((t) => t.triggers.includes(a)).map((t) => Object.assign({}, t, { via: [a] }));
     if (a === 'A8') {
       a8Types().forEach((type) => items.push({ id: 'A8-' + type, type: type, triggers: ['A8'], via: ['A8'],
-        name: 'Other approximation', desc: val('A8-just') || 'The approximation described above.', examples: [] }));
+        name: 'Other approximation', desc: val('A8-which') || 'The approximation described above.', examples: [] }));
     }
     const TYPE_ORDER = ['IV', 'EV', 'CV', 'SV'];
     const rank = (t) => (t.note ? 2 : t.severity === 'key' ? 0 : 1) * 10 + TYPE_ORDER.indexOf(t.type);
@@ -411,7 +411,7 @@
   function textarea(name, label, rows) {
     return '<label class="field"><span>' + T(label) + '</span><textarea name="' + name + '" rows="' + (rows || 3) + '">' + esc(val(name)) + '</textarea></label>';
   }
-  function askFor(t) { return 'Is ' + (t.ask || lc(t.name)) + ' relevant for the paper, and if so, how does the paper address it?'; }
+  function askFor(t) { return 'How does the paper address ' + (t.ask || lc(t.name)) + '?'; }
   function threatCard(t) {
     const type = VALIDITY[t.type].name;
     if (t.note) return '<p class="note"><strong>' + esc(t.name) + '</strong> · ' + esc(type) + '. ' + T(t.desc) + '</p>';
@@ -424,7 +424,7 @@
     const v = VALIDITY[type];
     return '<div class="threat"><h3>' + esc(v.name) + '</h3><p>' + T(v.question) + '</p>' +
       (v.naMeans ? '<p class="example">' + T(v.naMeans) + '</p>' : '') +
-      textarea('note:A8-' + type, 'Is ' + v.name.toLowerCase() + ' relevant for this approximation, and if so, how does the paper address it?', 2) + '</div>';
+      textarea('note:A8-' + type, 'How does the paper address ' + v.name.toLowerCase() + ' for this approximation? Leave empty if it is not threatened.', 2) + '</div>';
   }
 
   function screenIntro() {
@@ -441,7 +441,6 @@
   }
   function screenA1() {
     return '<p class="kicker">Part A · Question 1 of 8</p><h2>A1. What is the research question?</h2>' +
-      '<p class="muted">Hover over an underlined term for its definition.</p>' +
       textarea('A1-rq', 'Research question: one sentence naming treatment, outcome, and target models', 3) +
       textarea('A1-concl', 'Conclusions: the main conclusions the paper draws from this experiment; Part B refers back to them', 3) +
       '<p class="example"><strong>Example:</strong> How does the MMLU benchmark score (outcome) of Olmo 3 32B (target model) change when we remove all math competition data from its pretraining data (treatment)?</p>';
@@ -454,13 +453,14 @@
       radios(a, [{ value: 'Yes' }, { value: 'No' }]);
     if (a === 'A8') {
       if (val('A8') === 'Yes') {
-        html += textarea('A8-just', 'Description of the approximation', 2) + '<div class="sub">' + PART_B.map(a8Card).join('') + '</div>';
+        html += textarea('A8-which', q.which, 2) + '<div class="sub">' + PART_B.map(a8Card).join('') + '</div>';
       } else {
         html += '<p class="routes">If [Yes], name the validity types that the approximation threatens; [NA] is then not allowed for those questions.</p>';
       }
       return html;
     }
     if (val(a) === 'Yes') {
+      html += textarea(a + '-which', q.which, 2);
       const items = threatsFor(a);
       if (items.length) {
         html += '<div class="sub">' + items.map(threatCard).join('') + '</div>';
@@ -525,7 +525,7 @@
     L.push('**A1. What is the research question?**', '', 'Research question: ' + (val('A1-rq') || '…'), '', 'Conclusions: ' + (val('A1-concl') || '…'), '');
     PART_A.forEach((a) => {
       L.push('**' + a + '. ' + QUESTIONS_A[a].q + '** [' + (val(a) || '…') + ']' + (a === 'A8' && val('A8') === 'Yes' && a8Types().length ? ' — threatens: ' + a8Types().join(', ') : ''), '');
-      if (a === 'A8' && val('A8') === 'Yes') L.push('Description: ' + (val('A8-just') || '…'), '');
+      if (val(a) === 'Yes') L.push(QUESTIONS_A[a].which + ' ' + (val(a + '-which') || '…'), '');
     });
     L.push('## Part B — Validity', '');
     PART_B.forEach((type) => {
