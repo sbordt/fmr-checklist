@@ -275,7 +275,6 @@
   // ------------------------------------------------------------------
   const GLOSSARY = {
     'treatment': 'The change to the training process or data whose effect the paper wants to know (e.g., adding math data to the pre-training mix, lowering the learning rate, including a document in the training set).',
-    'control': 'The same setup without the treatment.',
     'outcome': 'The property measured to see the effect (e.g., a benchmark score, the training loss, how well a document is memorized).',
     'target models': 'The models the paper’s conclusions are about. They may be larger, or trained differently, than the models the paper actually trains.',
     'unit': 'The thing that does or does not receive the treatment and on which the outcome is measured. Usually a unit is one training run; in some designs it is a document, token, or subword within one run.',
@@ -325,8 +324,7 @@
     ['influence functions', 'influence functions?'], ['canary', 'canar(?:y|ies)'], ['selection bias', 'selection bias'],
     ['confounder', 'confounders?|confounding|confounded'], ['exchangeability', 'exchangeab(?:ility|le)'],
     ['positivity', 'positivity'], ['SUTVA', 'SUTVA'], ['interference', '(?:no )?interference'], ['consistency', 'consistency'],
-    ['operationalization', 'operationalization'], ['unit', 'units?'], ['outcome', 'outcomes?'], ['treatment', 'treatments?'],
-    ['control', 'controls?']
+    ['operationalization', 'operationalization'], ['unit', 'units?'], ['outcome', 'outcomes?'], ['treatment', 'treatments?']
   ];
   const TERM_RE = new RegExp('\\b(?:' + TERM_PATTERNS.map((t, i) => '(?<t' + i + '>' + t[1] + ')').join('|') + ')\\b', 'gi');
   let seenTerms = new Set();
@@ -345,6 +343,7 @@
     }).join('');
   }
   const T = (text) => wrapTerms(esc(text));
+  const lc = (name) => (/^[A-Z]{2,}/.test(name) ? name : name.charAt(0).toLowerCase() + name.slice(1));
 
   // ------------------------------------------------------------------
   // State
@@ -381,7 +380,7 @@
     const keys = Object.keys(byType);
     if (!keys.length) return '';
     return 'If [Yes], the paper has to discuss the threats to ' +
-      keys.map((ty) => '<b>' + VALIDITY[ty].name.toLowerCase() + '</b> (' + byType[ty].map((n) => n.toLowerCase()).join('; ') + ')').join(', ') +
+      keys.map((ty) => '<b>' + VALIDITY[ty].name.toLowerCase() + '</b> (' + byType[ty].map(lc).join('; ') + ')').join(', ') +
       '; [NA] is then not allowed for ' + keys.join(', ') + '.';
   }
 
@@ -480,7 +479,7 @@
     if (threats.length) {
       const undisc = threats.filter((t) => state.discussed[t.id] !== true);
       const names = [];
-      undisc.forEach((t) => { const n = t.name.toLowerCase() + (t.via.length ? ' (' + t.via.join(', ') + ')' : ''); if (!names.includes(n)) names.push(n); });
+      undisc.forEach((t) => { const n = lc(t.name) + (t.via.length ? ' (' + t.via.join(', ') + ')' : ''); if (!names.includes(n)) names.push(n); });
       html += undisc.length
         ? '<p class="suggest no">Not marked as properly discussed: ' + esc(names.join('; ')) + '. If the paper leaves any of them undiscussed, answer [No] and name it.</p>'
         : '<p class="suggest yes">All ' + threats.length + ' applicable threats are marked as properly discussed, which supports a [Yes].</p>';
