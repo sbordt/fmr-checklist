@@ -58,8 +58,6 @@
   .threat h3 { margin: 0 0 6px; }
   .tag { display: inline-block; font-size: .78rem; font-weight: 500; color: var(--accent); border: 1px solid var(--accent);
          border-radius: 999px; padding: 0 8px; margin-left: 6px; vertical-align: middle; }
-  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; }
-  .dot.key { background: #c62828; } .dot.care { background: #e6ab02; }
   .ask { font-size: .95rem; margin-top: 8px; }
   .ask .answer { margin: 6px 0 0; }
   .ask .answer label { padding: 5px 12px; background: var(--bg); }
@@ -368,6 +366,7 @@
   function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* unavailable */ } }
   function load() { try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) Object.assign(state, JSON.parse(raw)); } catch (e) { /* ignore */ } }
   const val = (k) => state[k] || '';
+  const a8Types = () => PART_B.filter((t) => state['A8t:' + t] === 'Yes');
 
   // ------------------------------------------------------------------
   // The graph: which threats apply, given the Part A answers.
@@ -375,7 +374,7 @@
   function applicable(type) {
     const items = THREATS.filter((t) => t.type === type && (t.triggers.includes('*') || t.triggers.some((a) => val(a) === 'Yes')))
       .map((t) => Object.assign({}, t, { via: t.triggers.filter((a) => a !== '*' && val(a) === 'Yes') }));
-    if (val('A8') === 'Yes' && state.A8types.includes(type)) {
+    if (val('A8') === 'Yes' && a8Types().includes(type)) {
       items.push({ id: 'A8-' + type, type: type, triggers: ['A8'], via: ['A8'], name: 'Other approximation (A8)',
                    desc: val('A8-just') || 'The approximation described in A8.', examples: [] });
     }
@@ -416,7 +415,7 @@
   function threatsFor(a) {
     const items = THREATS.filter((t) => t.triggers.includes(a)).map((t) => Object.assign({}, t, { via: [a] }));
     if (a === 'A8') {
-      state.A8types.forEach((type) => items.push({ id: 'A8-' + type, type: type, triggers: ['A8'], via: ['A8'],
+      a8Types().forEach((type) => items.push({ id: 'A8-' + type, type: type, triggers: ['A8'], via: ['A8'],
         name: 'Other approximation', desc: val('A8-just') || 'The approximation described above.', examples: [] }));
     }
     const TYPE_ORDER = ['IV', 'EV', 'CV', 'SV'];
@@ -440,8 +439,7 @@
   function threatCard(t) {
     const type = VALIDITY[t.type].name;
     if (t.note) return '<p class="note"><strong>' + esc(t.name) + '</strong> · ' + esc(type) + '. ' + T(t.desc) + '</p>';
-    const dot = t.severity === 'key' ? '<span class="dot key" title="Key threat"></span>' : (t.triggers.includes('*') ? '' : '<span class="dot care" title="Requires careful consideration"></span>');
-    let html = '<div class="threat"><h3>' + dot + esc(t.name) + ' <span class="tag">' + esc(type) + '</span></h3><p>' + T(t.desc) + '</p>';
+    let html = '<div class="threat"><h3>' + esc(t.name) + ' <span class="tag">' + esc(type) + '</span></h3><p>' + T(t.desc) + '</p>';
     (t.examples || []).forEach((ex) => { html += '<p class="example' + (ex.src === 'new' ? ' new' : '') + '"><strong>Example:</strong> ' + T(ex.text) + '</p>'; });
     const d = state.discussed[t.id];
     html += '<div class="ask"><span>Does the paper properly discuss this threat?</span><div class="answer">' +
@@ -449,6 +447,23 @@
       '<label><input type="radio" name="disc:' + t.id + '" value="no"' + (d === false ? ' checked' : '') + '> No</label></div>' +
       textarea('disc-just:' + t.id, 'How does the paper discuss this threat?', 2) + '</div></div>';
     return html;
+  }
+
+  function a8Card(type) {
+    const v = VALIDITY[type];
+    const id = 'A8-' + type;
+    let html = '<div class="threat"><h3>' + esc(v.name) + '</h3><p>' + T(v.question) + '</p>' +
+      (v.naMeans ? '<p class="example">' + T(v.naMeans) + '</p>' : '') +
+      '<div class="ask"><span>Does the approximation threaten this type of validity?</span>' +
+      radios('A8t:' + type, [{ value: 'Yes' }, { value: 'No' }]) + '</div>';
+    if (state['A8t:' + type] === 'Yes') {
+      const d = state.discussed[id];
+      html += '<div class="ask"><span>Does the paper properly discuss this threat?</span><div class="answer">' +
+        '<label><input type="radio" name="disc:' + id + '" value="yes"' + (d === true ? ' checked' : '') + '> Yes</label>' +
+        '<label><input type="radio" name="disc:' + id + '" value="no"' + (d === false ? ' checked' : '') + '> No</label></div>' +
+        textarea('disc-just:' + id, 'How does the paper discuss this threat?', 2) + '</div>';
+    }
+    return html + '</div>';
   }
 
   function screenIntro() {
@@ -477,12 +492,14 @@
       '<p>' + T(q.desc) + '</p><p class="example"><strong>Example:</strong> ' + T(q.example) + '</p>' +
       radios(a, [{ value: 'Yes' }, { value: 'No' }]);
     if (a === 'A8') {
-      html += '<div id="A8-more"' + (val('A8') === 'Yes' ? '' : ' hidden') + '>' + textarea('A8-just', 'Description of the approximation', 2) +
-        '<p class="routes">Name the validity types that the approximation threatens; [NA] is then not allowed for those questions.</p><div class="types">' +
-        PART_B.map((t) => '<label><input type="checkbox" name="A8-' + t + '"' + (state.A8types.includes(t) ? ' checked' : '') + '> ' + VALIDITY[t].name + '</label>').join('') + '</div></div>';
-    } else {
-      html += textarea(a + '-just', 'Justification', 2);
+      if (val('A8') === 'Yes') {
+        html += textarea('A8-just', 'Description of the approximation', 2) + '<div class="sub">' + PART_B.map(a8Card).join('') + '</div>';
+      } else {
+        html += '<p class="routes">If [Yes], name the validity types that the approximation threatens; [NA] is then not allowed for those questions.</p>';
+      }
+      return html;
     }
+    html += textarea(a + '-just', 'Justification', 2);
     if (val(a) === 'Yes') {
       const items = threatsFor(a);
       if (items.length) {
@@ -547,7 +564,7 @@
     L.push('## Part A — Research question and approximation strategies', '');
     L.push('**A1. What is the research question?**', '', 'Research question: ' + (val('A1-rq') || '…'), '', 'Conclusions: ' + (val('A1-concl') || '…'), '');
     PART_A.forEach((a) => {
-      L.push('**' + a + '. ' + QUESTIONS_A[a].q + '** [' + (val(a) || '…') + ']' + (a === 'A8' && val('A8') === 'Yes' && state.A8types.length ? ' — threatens: ' + state.A8types.join(', ') : ''), '');
+      L.push('**' + a + '. ' + QUESTIONS_A[a].q + '** [' + (val(a) || '…') + ']' + (a === 'A8' && val('A8') === 'Yes' && a8Types().length ? ' — threatens: ' + a8Types().join(', ') : ''), '');
       L.push((a === 'A8' ? 'Description: ' : 'Justification: ') + (val(a + '-just') || '…'), '');
     });
     L.push('## Part B — Validity', '');
@@ -627,11 +644,7 @@
       state.discussed[el.name.slice(5)] = (el.value === 'yes');
     } else if (el.type === 'radio') {
       state[el.name] = el.value;
-      if (PART_A.includes(el.name)) rerender = true; // unfold or fold the threats
-    } else if (el.type === 'checkbox' && /^A8-/.test(el.name)) {
-      const t = el.name.slice(3);
-      state.A8types = PART_B.filter((x) => (x === t ? el.checked : state.A8types.includes(x)));
-      rerender = true;
+      if (PART_A.includes(el.name) || el.name.startsWith('A8t:')) rerender = true; // unfold or fold the threats
     }
     // A disabled [NA] cannot stay selected once a strategy makes the type applicable.
     PART_B.forEach((type) => { if (state[type] === 'NA' && (type === 'SV' || triggersOf(type).length)) state[type] = ''; });
