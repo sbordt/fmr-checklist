@@ -22,7 +22,7 @@ paper; it is marked so that it can be reviewed.
 
 | File | Contents |
 |---|---|
-| `index.html` | The page, as a step-by-step form: intro, A1 to A8 one per screen, then for each validity type one screen per applicable threat and one answer screen, and a summary with export as Markdown or JSON. Terms the checklist defines are underlined and show their definition on hover (the `GLOSSARY` table). Answers are kept in the browser (`localStorage`); nothing is sent anywhere. No external dependencies. The strategy-to-threat graph is the `THREATS` table in the script. |
+| `index.html` | The page, as a step-by-step form: intro, then A1 to A8 one per page. A [Yes] unfolds, on the same page, the validity threats the strategy gives rise to, each with a description, examples, and a Yes/No on whether the paper properly discusses it. Then one page with the threats that apply to all papers, one page with the Part B answers (Yes/No/NA per validity type, [NA] disabled where a Part A answer makes the type applicable), and a summary with export as Markdown or JSON. Terms the checklist defines are underlined and show their definition on hover (the `GLOSSARY` table); the strategy-to-threat graph is the `THREATS` table. |
 | `checklist.md` | The checklist as plain Markdown, in the form of the paper's appendix. |
 
 ## Development
