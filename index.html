@@ -44,7 +44,7 @@
   .answer label:has(input:checked) { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
   .answer label.off { opacity: .4; cursor: not-allowed; }
   .answer input { margin: 0; }
-  textarea, input[type=text] { width: 100%; font: inherit; color: inherit; background: var(--bg);
+  textarea { width: 100%; font: inherit; color: inherit; background: var(--bg);
                                border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
   label.field { display: block; margin: 12px 0; }
   label.field > span { display: block; font-size: .92rem; color: var(--muted); margin-bottom: 4px; }
@@ -58,15 +58,8 @@
   .threat h3 { margin: 0 0 6px; }
   .tag { display: inline-block; font-size: .78rem; font-weight: 500; color: var(--accent); border: 1px solid var(--accent);
          border-radius: 999px; padding: 0 8px; margin-left: 6px; vertical-align: middle; }
-  .ask { font-size: .95rem; margin-top: 8px; }
-  .ask .answer { margin: 6px 0 0; }
-  .ask .answer label { padding: 5px 12px; background: var(--bg); }
   .block { border-top: 1px solid var(--line); padding: 14px 0 6px; }
   .block h3 { margin: 0 0 4px; }
-  details { margin: 10px 0; color: var(--muted); font-size: .95rem; }
-  details summary { cursor: pointer; color: var(--fg); }
-  .types { display: flex; flex-wrap: wrap; gap: 14px; margin: 6px 0; font-size: .95rem; }
-  .types label { display: inline-flex; gap: 6px; align-items: center; }
   .nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--line); }
   button { font: inherit; font-size: .95rem; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--line);
            background: var(--soft); color: var(--fg); cursor: pointer; }
@@ -150,7 +143,7 @@
       name: 'Statistical validity',
       question: 'Does the paper discuss and establish that its main result reflects a real effect, and is not due to noise, a poorly fitted curve, or picking the best of many comparisons?',
       allowNA: false,
-      yesRule: 'A [Yes] requires the paper to address each applicable point above. Answer [No] if any applicable point is undiscussed, and name it.',
+      yesRule: 'A [Yes] requires the paper to address each applicable threat. Answer [No] if any applicable threat is undiscussed, and name it.',
       yesRuleNew: true, // not from the paper; shown in pink
       naMeans: ''
     },
@@ -334,7 +327,7 @@
   // State
   // ------------------------------------------------------------------
   const STORAGE_KEY = 'fmr-checklist-v5';
-  const state = { step: 'intro', discussed: {}, A8types: [] };
+  const state = { step: 'intro' };
   const $ = (sel, root) => (root || document).querySelector(sel);
   const $$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -344,7 +337,7 @@
   const a8Types = () => PART_B.filter((t) => val('note:A8-' + t).trim() !== '');
 
   // ------------------------------------------------------------------
-  // The graph: which threats apply, given the Part A answers.
+  // The graph: which threats apply, given the answers to the eight questions.
   // ------------------------------------------------------------------
   function applicable(type) {
     const items = THREATS.filter((t) => t.type === type && (t.triggers.includes('*') || t.triggers.some((a) => val(a) === 'Yes')))
@@ -371,9 +364,9 @@
   }
 
   // ------------------------------------------------------------------
-  // Steps: the Part A questions, one page each; a Yes unfolds the threats it
-  // raises. Then the threats that apply to all papers, the Part B answers,
-  // and the summary.
+  // Steps: the eight questions, one page each; a Yes unfolds the threats it
+  // raises. Then the threats that apply to all papers, the answers per validity
+  // type, and the summary.
   // ------------------------------------------------------------------
   function steps() {
     const list = [{ id: 'intro' }, { id: 'A1' }];
@@ -386,7 +379,7 @@
     if (i < 0) { i = Math.min(state.stepIndex || 0, list.length - 1); state.step = list[i].id; }
     return i;
   }
-  // The threats a Part A answer raises, in the order of the validity types.
+  // The threats a Yes to one question raises, key threats first.
   function threatsFor(a) {
     const items = THREATS.filter((t) => t.triggers.includes(a)).map((t) => Object.assign({}, t, { via: [a] }));
     if (a === 'A8') {
@@ -440,7 +433,7 @@
   function screenA1() {
     return '<p class="kicker">Question 1 of 8</p><h2>A1. What is the research question?</h2>' +
       textarea('A1-rq', 'Research question: one sentence naming treatment, outcome, and target models', 3) +
-      textarea('A1-concl', 'Conclusions: the main conclusions the paper draws from this experiment; Part B refers back to them', 3) +
+      textarea('A1-concl', 'Conclusions: the main conclusions the paper draws from this experiment', 3) +
       '<p class="example"><strong>Example:</strong> How does the MMLU benchmark score (outcome) of Olmo 3 32B (target model) change when we remove all math competition data from its pretraining data (treatment)?</p>';
   }
   function screenA(a) {
@@ -471,7 +464,7 @@
   function screenGeneral() {
     const items = THREATS.filter((t) => t.triggers.includes('*')).map((t) => Object.assign({}, t, { via: [] }));
     return '<p class="kicker">All papers</p><h2>Statistical validity</h2>' +
-      '<p>' + T(VALIDITY.SV.question) + '</p><p class="muted" style="font-size:.95rem">These threats apply to every paper, whatever the strategies selected in Part A.</p>' +
+      '<p>' + T(VALIDITY.SV.question) + '</p><p class="muted" style="font-size:.95rem">These threats apply to every paper, whatever the strategies selected above.</p>' +
       items.map(threatCard).join('');
   }
   function screenAnswers() {
@@ -611,14 +604,10 @@
     else if (el.id === 'reset') {
       if (!window.confirm('Clear all answers and start over?')) return;
       Object.keys(state).forEach((k) => delete state[k]);
-      Object.assign(state, { step: 'intro', discussed: {}, A8types: [] });
+      Object.assign(state, { step: 'intro' });
       try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignore */ }
       render();
     }
-  });
-  // Enter in the paper field moves on; textareas keep Enter for line breaks.
-  document.addEventListener('keydown', (ev) => {
-    if (ev.key === 'Enter' && ev.target.type === 'text') { ev.preventDefault(); $('#next').click(); }
   });
 
   // Tooltips for glossary terms (hover, keyboard focus, or tap).
