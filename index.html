@@ -48,8 +48,6 @@
                                border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
   label.field { display: block; margin: 12px 0; }
   label.field > span { display: block; font-size: .92rem; color: var(--muted); margin-bottom: 4px; }
-  .routes { font-size: .92rem; color: var(--muted); margin: 12px 0 0; }
-  .routes b { font-weight: 600; color: var(--fg); }
   .suggest { font-size: .95rem; margin: 6px 0; color: var(--muted); }
   .suggest.yes { color: var(--yes); } .suggest.no { color: var(--no); }
   .note { border-left: 3px solid var(--line); padding-left: 12px; color: var(--muted); font-size: .95rem; margin: 12px 0; }
@@ -353,15 +351,6 @@
     applicable(type).forEach((t) => { if (!t.note) t.via.forEach((a) => set.add(a)); });
     return Array.from(set);
   }
-  function routesText(a) {
-    const byType = {};
-    THREATS.filter((t) => t.triggers.includes(a) && !t.note).forEach((t) => { (byType[t.type] = byType[t.type] || []).push(t.name); });
-    const keys = Object.keys(byType);
-    if (!keys.length) return '';
-    return 'If [Yes], the paper has to discuss the threats to ' +
-      keys.map((ty) => '<b>' + VALIDITY[ty].name.toLowerCase() + '</b> (' + byType[ty].map(lc).join('; ') + ')').join(', ') +
-      '; [NA] is then not allowed for ' + keys.join(', ') + '.';
-  }
 
   // ------------------------------------------------------------------
   // Steps: the eight questions, one page each; a Yes unfolds the threats it
@@ -445,8 +434,6 @@
     if (a === 'A8') {
       if (val('A8') === 'Yes') {
         html += textarea('A8-which', q.which, 2) + '<div class="sub">' + PART_B.map(a8Card).join('') + '</div>';
-      } else {
-        html += '<p class="routes">If [Yes], name the validity types that the approximation threatens; [NA] is then not allowed for those questions.</p>';
       }
       return html;
     }
@@ -456,8 +443,6 @@
       if (items.length) {
         html += '<div class="sub">' + items.map(threatCard).join('') + '</div>';
       }
-    } else {
-      html += '<p class="routes">' + routesText(a) + '</p>';
     }
     return html;
   }
