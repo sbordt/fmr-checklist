@@ -36,28 +36,21 @@
   ul { padding-left: 20px; margin: 6px 0; }
   li { margin: 4px 0; }
   .example { color: var(--muted); margin: 6px 0; }
-  .status { font-size: .95rem; margin: 0 0 10px; color: var(--muted); }
-  .status.on { color: var(--accent); }
   .answer { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 6px; }
   .answer label { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 8px;
                   padding: 8px 14px; cursor: pointer; background: var(--soft); }
   .answer label:has(input:checked) { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
-  .answer label.off { opacity: .4; cursor: not-allowed; }
   .answer input { margin: 0; }
   textarea { width: 100%; font: inherit; color: inherit; background: var(--bg);
                                border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
   label.field { display: block; margin: 12px 0; }
   label.field > span { display: block; font-size: .92rem; color: var(--muted); margin-bottom: 4px; }
-  .suggest { font-size: .95rem; margin: 6px 0; color: var(--muted); }
-  .suggest.yes { color: var(--yes); } .suggest.no { color: var(--no); }
   .note { border-left: 3px solid var(--line); padding-left: 12px; color: var(--muted); font-size: .95rem; margin: 12px 0; }
   .sub { margin-top: 22px; padding-top: 12px; border-top: 1px solid var(--line); }
   .threat { background: var(--soft); border-radius: 10px; padding: 12px 14px; margin: 10px 0; }
   .threat h3 { margin: 0 0 6px; }
   .tag { display: inline-block; font-size: .78rem; font-weight: 500; color: var(--accent); border: 1px solid var(--accent);
          border-radius: 999px; padding: 0 8px; margin-left: 6px; vertical-align: middle; }
-  .block { border-top: 1px solid var(--line); padding: 14px 0 6px; }
-  .block h3 { margin: 0 0 4px; }
   .nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--line); }
   button { font: inherit; font-size: .95rem; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--line);
            background: var(--soft); color: var(--fg); cursor: pointer; }
@@ -67,9 +60,6 @@
   .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 14px; }
   .chip { border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; font-size: .9rem; background: none; color: var(--fg); cursor: pointer; }
   .chip.used { color: var(--accent); border-color: var(--accent); }
-  .chip.yes { color: var(--yes); border-color: var(--yes); }
-  .chip.no { color: var(--no); border-color: var(--no); }
-  .chip.na { color: var(--na); border-color: var(--na); }
   .chip.open { color: var(--muted); border-style: dashed; }
   .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
   .msg { color: var(--muted); font-size: .92rem; min-height: 1.4em; }
@@ -104,16 +94,19 @@
   // ------------------------------------------------------------------
   // Content. All questions, descriptions, and examples are taken from the
   // paper (Sections 3-5, Appendices C-F, and the checklist). Entries marked
-  // src: 'new' / yesRuleNew were added while drafting this page and are shown
+  // src: 'new' were added while drafting this page and are shown
   // in pink until reviewed.
   // ------------------------------------------------------------------
-  const PART_A = ['A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8'];
+  const QUESTIONS = ['SV', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8']; // the Yes/No questions, in order; A1 comes first
   const PART_B = ['SV', 'IV', 'EV', 'CV'];
   const STRATEGY = {
-    A2: 'proxy models', A3: 'proxy treatments', A4: 'proxy outcomes', A5: 'observational data',
+    SV: 'statistical validity', A2: 'proxy models', A3: 'proxy treatments', A4: 'proxy outcomes', A5: 'observational data',
     A6: 'units within a single run', A7: 'theoretical controls', A8: 'other approximations'
   };
   const QUESTIONS_A = {
+    SV: { which: null, q: 'Is the main result subject to noise, few or dependent units, or the best of many comparisons?',
+          desc: 'Every research strategy eventually approximates some population parameter from a finite sample. Statistical validity asks whether the estimate from the finite sample reliably reflects the underlying quantity.',
+          example: null },
     A2: { which: 'Which parts of the experiments involve proxy models?', q: 'Do the experiments involve proxy models?',
           desc: 'A proxy model is a model that is smaller or cheaper to train than the target models the claims are about, and that stands in for them in the experiment.',
           example: '1B models standing in for 32B models; a series of small models fitted with a scaling law to predict behavior at a larger size.' },
@@ -136,47 +129,17 @@
           desc: 'Any way in which the design deviates from the ideal experiment that is not covered by A2 to A7.',
           example: 'Measuring the outcome only at coarse checkpoint intervals; analyzing a subsample of the units.' }
   };
-  const VALIDITY = {
-    SV: {
-      name: 'Statistical validity',
-      question: 'Does the paper discuss and establish that its main result reflects a real effect, and is not due to noise, a poorly fitted curve, or picking the best of many comparisons?',
-      allowNA: false,
-      yesRule: 'A [Yes] requires the paper to address each applicable threat. Answer [No] if any applicable threat is undiscussed, and name it.',
-      yesRuleNew: true, // not from the paper; shown in pink
-      naMeans: ''
-    },
-    IV: {
-      name: 'Internal validity',
-      question: 'Does the paper discuss and establish that its estimate reflects a genuine causal effect of the treatment? For example, does the paper establish exchangeability, positivity, and SUTVA?',
-      allowNA: true,
-      yesRule: 'A [Yes] requires the paper to name each applicable assumption and argue for it, test it, bound its violation, or limit its claims. Answer [No] if any applicable assumption is undiscussed, and name it.',
-      naMeans: '[NA] means the experimenter assigned the treatment to separate, independent training runs and the groups differ in nothing but the treatment; the identifying assumptions then hold by design.'
-    },
-    EV: {
-      name: 'External validity',
-      question: 'If the paper makes claims about a target model or setting that is different from what is being studied, does the paper discuss and establish the validity of the claims about the target setting?',
-      allowNA: true,
-      yesRule: 'Answering [Yes] requires verification in the target setting, an argument from established behavior (e.g., known scaling behavior of the quantity), or claims explicitly limited to what was studied. Answer [No] if any applicable transfer is undiscussed, and name it.',
-      naMeans: '[NA] means that the experiment is run at the scale, with the training recipes, model families, and units, and at the aggregation level that the claims are about.'
-    },
-    CV: {
-      name: 'Construct validity',
-      question: 'If the implemented treatment or the measured outcome differs from the treatment or outcome named in the conclusions, does the paper discuss whether findings about the one carry over to the other?',
-      allowNA: true,
-      yesRule: 'A [Yes] requires an argument that the effects coincide (treatment) or that the two outcomes move together (outcome), or claims aligned with what was implemented and measured. Answer [No] if either applicable gap is undiscussed, and name it.',
-      naMeans: '[NA] means treatment and outcome are implemented exactly as stated in the research question.'
-    }
-  };
+  const VALIDITY = { SV: { name: 'Statistical validity' }, IV: { name: 'Internal validity' }, EV: { name: 'External validity' }, CV: { name: 'Construct validity' } };
 
   const THREATS = [
     // ---------------- Statistical validity ----------------
-    { id: 'SV-noise', ask: 'noise from a finite sample', type: 'SV', triggers: ['*'], name: 'Noise and repeated experiments',
+    { id: 'SV-noise', ask: 'noise from a finite sample', type: 'SV', triggers: ['SV'], name: 'Noise and repeated experiments',
       desc: 'When you estimate an effect from a finite, noisy sample, it might not reliably measure the true underlying quantity. What would come out if the experiment were repeated? Does the paper report error bars and say which source of randomness they capture? Observed outcomes may vary due to random initialization, data ordering, sampled evaluation subset, and so on.',
       examples: [{ text: 'The difference between two different training recipes can be smaller than the seed-to-seed variation within one training recipe.' }] },
-    { id: 'SV-units', ask: 'few or dependent units', type: 'SV', triggers: ['*'], name: 'Few or dependent units',
+    { id: 'SV-units', ask: 'few or dependent units', type: 'SV', triggers: ['SV'], name: 'Few or dependent units',
       desc: 'If the analysis relies on a few units, or units that are not independent, it makes the estimate less precise than what the raw sample count suggests.',
       examples: [{ text: 'Multiple fine-tunes of one base model are not independent units.' }] },
-    { id: 'SV-best', ask: 'picking the best of many comparisons', type: 'SV', triggers: ['*'], name: 'Best of many comparisons',
+    { id: 'SV-best', ask: 'picking the best of many comparisons', type: 'SV', triggers: ['SV'], name: 'Best of many comparisons',
       desc: 'Does the paper report the best of many noisy comparisons (arms, benchmarks, checkpoints), which may look strong by chance?',
       examples: [{ text: 'Some labs evaluate many model variants on private benchmark data before publishing the best score (Singh et al., 2025).' }] },
     { id: 'SV-fit', ask: 'the fit of the functional form', type: 'SV', triggers: ['A2'], name: 'Fitted functional form',
@@ -324,7 +287,7 @@
   // ------------------------------------------------------------------
   // State
   // ------------------------------------------------------------------
-  const STORAGE_KEY = 'fmr-checklist-v5';
+  const STORAGE_KEY = 'fmr-checklist-v6';
   const state = { step: 'intro' };
   const $ = (sel, root) => (root || document).querySelector(sel);
   const $$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
@@ -332,36 +295,14 @@
   function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* unavailable */ } }
   function load() { try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) Object.assign(state, JSON.parse(raw)); } catch (e) { /* ignore */ } }
   const val = (k) => state[k] || '';
-  const a8Types = () => PART_B.filter((t) => val('note:A8-' + t).trim() !== '');
 
   // ------------------------------------------------------------------
-  // The graph: which threats apply, given the answers to the eight questions.
+  // Steps: the research question, then the Yes/No questions, one page each;
+  // a Yes unfolds the threats it raises. Then the summary.
   // ------------------------------------------------------------------
-  function applicable(type) {
-    const items = THREATS.filter((t) => t.type === type && (t.triggers.includes('*') || t.triggers.some((a) => val(a) === 'Yes')))
-      .map((t) => Object.assign({}, t, { via: t.triggers.filter((a) => a !== '*' && val(a) === 'Yes') }));
-    if (val('A8') === 'Yes' && a8Types().includes(type)) {
-      items.push({ id: 'A8-' + type, type: type, triggers: ['A8'], via: ['A8'], name: 'Other approximation (A8)',
-                   desc: val('A8-which') || 'The approximation described in A8.', examples: [] });
-    }
-    return items;
-  }
-  function triggersOf(type) {
-    const set = new Set();
-    applicable(type).forEach((t) => { if (!t.note) t.via.forEach((a) => set.add(a)); });
-    return Array.from(set);
-  }
-
-  // ------------------------------------------------------------------
-  // Steps: the eight questions, one page each; a Yes unfolds the threats it
-  // raises. Then the threats that apply to all papers, the answers per validity
-  // type, and the summary.
-  // ------------------------------------------------------------------
+  const ORDER = ['A1'].concat(QUESTIONS);
   function steps() {
-    const list = [{ id: 'intro' }, { id: 'A1' }];
-    PART_A.forEach((a) => list.push({ id: a }));
-    list.push({ id: 'general' }, { id: 'answers' }, { id: 'summary' });
-    return list;
+    return [{ id: 'intro' }].concat(ORDER.map((id) => ({ id: id })), [{ id: 'summary' }]);
   }
   function currentIndex(list) {
     let i = list.findIndex((s) => s.id === state.step);
@@ -371,10 +312,6 @@
   // The threats a Yes to one question raises, key threats first.
   function threatsFor(a) {
     const items = THREATS.filter((t) => t.triggers.includes(a)).map((t) => Object.assign({}, t, { via: [a] }));
-    if (a === 'A8') {
-      a8Types().forEach((type) => items.push({ id: 'A8-' + type, type: type, triggers: ['A8'], via: ['A8'],
-        name: 'Other approximation', desc: val('A8-which') || 'The approximation described above.', examples: [] }));
-    }
     const TYPE_ORDER = ['IV', 'EV', 'CV', 'SV'];
     const rank = (t) => (t.note ? 2 : t.severity === 'key' ? 0 : 1) * 10 + TYPE_ORDER.indexOf(t.type);
     return items.map((t, i) => [t, i]).sort((x, y) => (rank(x[0]) - rank(y[0])) || (x[1] - y[1])).map((x) => x[0]);
@@ -383,12 +320,9 @@
   // ------------------------------------------------------------------
   // Screens
   // ------------------------------------------------------------------
-  function radios(name, options, disabled) {
-    return '<div class="answer">' + options.map((o) => {
-      const off = (disabled || []).includes(o.value);
-      return '<label' + (off ? ' class="off"' : '') + '><input type="radio" name="' + name + '" value="' + o.value + '"' +
-        (val(name) === o.value ? ' checked' : '') + (off ? ' disabled' : '') + '> ' + esc(o.label || o.value) + '</label>';
-    }).join('') + '</div>';
+  function radios(name, options) {
+    return '<div class="answer">' + options.map((o) =>
+      '<label><input type="radio" name="' + name + '" value="' + o + '"' + (val(name) === o ? ' checked' : '') + '> ' + esc(o) + '</label>').join('') + '</div>';
   }
   function textarea(name, label, rows) {
     return '<label class="field"><span>' + T(label) + '</span><textarea name="' + name + '" rows="' + (rows || 3) + '">' + esc(val(name)) + '</textarea></label>';
@@ -402,10 +336,10 @@
     html += textarea('note:' + t.id, askFor(t), 2) + '</div>';
     return html;
   }
+  // Under "other approximations": one card per type of validity.
   function a8Card(type) {
     const v = VALIDITY[type];
-    return '<div class="threat"><h3>' + esc(v.name) + '</h3><p>' + T(v.question) + '</p>' +
-      (v.naMeans ? '<p class="example">' + T(v.naMeans) + '</p>' : '') +
+    return '<div class="threat"><h3>' + esc(v.name) + '</h3><p>' + T(GLOSSARY[v.name.toLowerCase()] || '') + '</p>' +
       textarea('note:A8-' + type, 'How does the paper address ' + v.name.toLowerCase() + ' for this approximation? Leave empty if it is not threatened.', 2) + '</div>';
   }
 
@@ -413,78 +347,36 @@
     return '<h1>Validity Checklist for Foundation Model Research</h1>' +
       '<p class="muted">Foundation model research relies on strategies that approximate the ideal experiment at a fraction of the cost: proxy models and scaling laws, proxy treatments and outcomes, observational data, units within a single training run, and theoretical controls. Each comes with implicit assumptions. This checklist walks authors and reviewers through them.</p>' +
       '<ul>' +
-      '<li>Eight questions identify the approximation strategies of the experiment.</li>' +
-      '<li>A [Yes] unfolds the validity threats that the strategy gives rise to, each with a description and an example, and asks how the paper addresses them.</li>' +
-      '<li>At the end, you answer for each of the four types of validity whether the paper properly discusses the threats to it, and you can export the result as Markdown.</li>' +
+      '<li>Nine questions: the research question, then statistical validity and the approximation strategies of the experiment.</li>' +
+      '<li>A [Yes] unfolds the validity threats that come with it, each with a description and an example, and asks how the paper addresses them.</li>' +
+      '<li>At the end, the result can be exported as Markdown. Answers are stored only in your browser.</li>' +
       '</ul>' +
       '<p class="new">Text in this color was added while drafting this page and is not taken from the paper; it still has to be reviewed.</p>';
   }
   function screenA1() {
-    return '<p class="kicker">Question 1 of 8</p><h2>A1. What is the research question?</h2>' +
+    return '<p class="kicker">Question 1 of ' + ORDER.length + '</p><h2>1. What is the research question?</h2>' +
       textarea('A1-rq', 'Research question: one sentence naming treatment, outcome, and target models', 3) +
       textarea('A1-concl', 'Conclusions: the main conclusions the paper draws from this experiment', 3) +
       '<p class="example"><strong>Example:</strong> How does the MMLU benchmark score (outcome) of Olmo 3 32B (target model) change when we remove all math competition data from its pretraining data (treatment)?</p>';
   }
   function screenA(a) {
     const q = QUESTIONS_A[a];
-    const n = PART_A.indexOf(a) + 2;
-    let html = '<p class="kicker">Question ' + n + ' of 8</p><h2>' + a + '. ' + esc(q.q) + '</h2>' +
-      '<p>' + T(q.desc) + '</p><p class="example"><strong>Example:</strong> ' + T(q.example) + '</p>' +
-      radios(a, [{ value: 'Yes' }, { value: 'No' }]);
-    if (a === 'A8') {
-      if (val('A8') === 'Yes') {
-        html += textarea('A8-which', q.which, 2) + '<div class="sub">' + PART_B.map(a8Card).join('') + '</div>';
-      }
-      return html;
-    }
+    const n = ORDER.indexOf(a) + 1;
+    let html = '<p class="kicker">Question ' + n + ' of ' + ORDER.length + '</p><h2>' + n + '. ' + esc(q.q) + '</h2>' +
+      '<p>' + T(q.desc) + '</p>' + (q.example ? '<p class="example"><strong>Example:</strong> ' + T(q.example) + '</p>' : '') +
+      radios(a, ['Yes', 'No']);
     if (val(a) === 'Yes') {
-      html += textarea(a + '-which', q.which, 2);
-      const items = threatsFor(a);
-      if (items.length) {
-        html += '<div class="sub">' + items.map(threatCard).join('') + '</div>';
-      }
+      if (q.which) html += textarea(a + '-which', q.which, 2);
+      if (a === 'A8') html += '<div class="sub">' + PART_B.map(a8Card).join('') + '</div>';
+      else { const items = threatsFor(a); if (items.length) html += '<div class="sub">' + items.map(threatCard).join('') + '</div>'; }
     }
-    return html;
-  }
-  function screenGeneral() {
-    const items = THREATS.filter((t) => t.triggers.includes('*')).map((t) => Object.assign({}, t, { via: [] }));
-    return '<p class="kicker">All papers</p><h2>Statistical validity</h2>' +
-      '<p>' + T(VALIDITY.SV.question) + '</p><p class="muted" style="font-size:.95rem">These threats apply to every paper, whatever the strategies selected above.</p>' +
-      items.map(threatCard).join('');
-  }
-  function screenAnswers() {
-    let html = '<p class="kicker">Answers</p><h2>Validity</h2>' +
-      '<p class="muted">For each type of validity: does the paper properly discuss the threats to it? The applicable threats are the ones unfolded under the questions.</p>';
-    PART_B.forEach((type) => {
-      const v = VALIDITY[type];
-      const items = applicable(type);
-      const threats = items.filter((t) => !t.note);
-      const via = triggersOf(type);
-      const active = type === 'SV' || via.length > 0;
-      html += '<div class="block"><h3>' + type + '. ' + esc(v.name) + '</h3>';
-      if (type === 'SV') html += '<p class="status on">Applies to all papers.</p>';
-      else if (active) html += '<p class="status on">Applicable, because ' + via.map((a) => a + ' = Yes (' + STRATEGY[a] + ')').join(', ') + '. [NA] is not allowed.</p>';
-      else html += '<p class="status">None of the selected strategies makes this applicable. ' + T(v.naMeans) + '</p>';
-      if (threats.length) {
-        const open = threats.filter((t) => val('note:' + t.id).trim() === '');
-        const names = [];
-        open.forEach((t) => { const n = lc(t.name) + (t.via.length ? ' (' + t.via.join(', ') + ')' : ''); if (!names.includes(n)) names.push(n); });
-        html += open.length
-          ? '<p class="suggest no">Threats without a note yet: ' + esc(names.join('; ')) + '. Answer [No] if the paper leaves any applicable threat undiscussed, and name it.</p>'
-          : '<p class="suggest yes">All ' + threats.length + ' applicable threats have a note.</p>';
-      }
-      html += radios(type, ['Yes', 'No'].concat(v.allowNA ? ['NA'] : []).map((o) => ({ value: o })), active ? ['NA'] : []);
-      html += textarea(type + '-just', 'Justification', 2) + '</div>';
-    });
     return html;
   }
   function chip(label, cls, step) { return '<button type="button" class="chip ' + cls + '" data-go="' + step + '">' + esc(label) + '</button>'; }
   function screenSummary() {
     return '<p class="kicker">Summary</p><h2>Validity checklist</h2>' +
-      '<p class="muted">Approximation strategies; click a chip to go back to that question.</p><div class="chips">' +
-      PART_A.map((a) => chip(a + ' ' + (val(a) || '—'), val(a) === 'Yes' ? 'used' : val(a) === 'No' ? '' : 'open', a)).join('') + '</div>' +
-      '<p class="muted">Validity threats properly discussed</p><div class="chips">' +
-      PART_B.map((t) => chip(t + ' ' + (val(t) || '—'), val(t) ? val(t).toLowerCase() : 'open', 'answers')).join('') + '</div>' +
+      '<p class="muted">Click a chip to go back to that question.</p><div class="chips">' +
+      QUESTIONS.map((a) => chip(STRATEGY[a] + ': ' + (val(a) || '—'), val(a) === 'Yes' ? 'used' : val(a) === 'No' ? '' : 'open', a)).join('') + '</div>' +
       '<div class="toolbar"><button type="button" class="primary" id="copy-md">Copy as Markdown</button>' +
       '<button type="button" id="download-md">Download Markdown</button><button type="button" id="download-json">Download JSON</button>' +
       '<button type="button" id="print">Print</button><button type="button" id="reset">Start over</button></div>' +
@@ -495,23 +387,18 @@
   // Export
   // ------------------------------------------------------------------
   function markdown() {
-    const L = [];
-    L.push('# Validity checklist', '');
-    L.push('## Research question and approximation strategies', '');
-    L.push('**A1. What is the research question?**', '', 'Research question: ' + (val('A1-rq') || '…'), '', 'Conclusions: ' + (val('A1-concl') || '…'), '');
-    PART_A.forEach((a) => {
-      L.push('**' + a + '. ' + QUESTIONS_A[a].q + '** [' + (val(a) || '…') + ']' + (a === 'A8' && val('A8') === 'Yes' && a8Types().length ? ' — threatens: ' + a8Types().join(', ') : ''), '');
-      if (val(a) === 'Yes') L.push(QUESTIONS_A[a].which + ' ' + (val(a + '-which') || '…'), '');
-    });
-    L.push('## Validity', '');
-    PART_B.forEach((type) => {
-      const items = applicable(type).filter((t) => !t.note);
-      const via = triggersOf(type);
-      L.push('**' + type + '. ' + VALIDITY[type].name + '** [' + (val(type) || '…') + ']' +
-        (type !== 'SV' ? (via.length ? ' — applicable because ' + via.join(', ') + ' = Yes' : ' — not applicable for the selected strategies') : ''), '');
-      items.forEach((t) => { L.push('- ' + t.name + (t.via.length ? ' (' + t.via.join(', ') + ')' : '') + ': ' + (val('note:' + t.id) || '…')); });
-      if (items.length) L.push('');
-      L.push('Justification: ' + (val(type + '-just') || '…'), '');
+    const L = ['# Validity checklist', '', '## 1. Research question', '', 'Research question: ' + (val('A1-rq') || '…'), '', 'Conclusions: ' + (val('A1-concl') || '…'), ''];
+    QUESTIONS.forEach((a) => {
+      const q = QUESTIONS_A[a];
+      L.push('## ' + (ORDER.indexOf(a) + 1) + '. ' + q.q + ' [' + (val(a) || '…') + ']', '');
+      if (val(a) !== 'Yes') return;
+      if (q.which) L.push(q.which + ' ' + (val(a + '-which') || '…'), '');
+      if (a === 'A8') {
+        PART_B.forEach((type) => { if (val('note:A8-' + type)) L.push('- ' + VALIDITY[type].name + ': ' + val('note:A8-' + type)); });
+      } else {
+        threatsFor(a).filter((t) => !t.note).forEach((t) => L.push('- ' + t.name + ' (' + VALIDITY[t.type].name.toLowerCase() + '): ' + (val('note:' + t.id) || '…')));
+      }
+      L.push('');
     });
     L.push('_Filled with the validity checklist at https://fmr-checklist.github.io/_');
     return L.join('\n');
@@ -535,12 +422,10 @@
     let html;
     if (step.id === 'intro') html = screenIntro();
     else if (step.id === 'A1') html = screenA1();
-    else if (PART_A.includes(step.id)) html = screenA(step.id);
-    else if (step.id === 'general') html = screenGeneral();
-    else if (step.id === 'answers') html = screenAnswers();
+    else if (QUESTIONS.includes(step.id)) html = screenA(step.id);
     else html = screenSummary();
     $('#screen').innerHTML = html;
-    $('#progress-label').textContent = step.id === 'intro' ? '' : step.id === 'summary' ? 'Done' : 'Step ' + i + ' of ' + (list.length - 2);
+    $('#progress-label').textContent = step.id === 'intro' ? '' : step.id === 'summary' ? 'Done' : 'Question ' + i + ' of ' + ORDER.length;
     $('#progress-bar').style.width = Math.round(100 * i / (list.length - 1)) + '%';
     $('#back').disabled = (i === 0);
     $('#next').textContent = step.id === 'intro' ? 'Start' : step.id === 'summary' ? 'Review from the start' : (i === list.length - 2 ? 'Finish' : 'Next');
@@ -565,19 +450,15 @@
   // Inputs on the current screen write to the state.
   $('#screen').addEventListener('input', (ev) => {
     const el = ev.target;
-    if (el.name && (el.type === 'text' || el.tagName === 'TEXTAREA')) { state[el.name] = el.value; save(); }
+    if (el.name && el.tagName === 'TEXTAREA') { state[el.name] = el.value; save(); }
   });
   $('#screen').addEventListener('change', (ev) => {
     const el = ev.target;
-    let rerender = false;
     if (el.type === 'radio') {
       state[el.name] = el.value;
-      if (PART_A.includes(el.name)) rerender = true; // unfold or fold the threats
+      save();
+      render({ keepScroll: true }); // unfold or fold the threats
     }
-    // A disabled [NA] cannot stay selected once a strategy makes the type applicable.
-    PART_B.forEach((type) => { if (state[type] === 'NA' && (type === 'SV' || triggersOf(type).length)) state[type] = ''; });
-    save();
-    if (rerender) render({ keepScroll: true });
   });
   $('#screen').addEventListener('click', async (ev) => {
     const el = ev.target.closest('button'); if (!el) return;
