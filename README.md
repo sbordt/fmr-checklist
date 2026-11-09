@@ -1,6 +1,6 @@
 # Validity Checklist for Foundation Model Research
 
-Source of the website at **https://fmr-checklist.github.io/**: a checklist for
+Source of the website at **https://sbordt.github.io/fmr-checklist/**: a checklist for
 authors and reviewers of foundation model research, filled in step by step.
 
 * Nine pages: the research question; the approximation strategies of the

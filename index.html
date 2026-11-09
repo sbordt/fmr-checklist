@@ -83,7 +83,7 @@
     <span class="msg" id="msg"></span>
     <button type="button" class="primary" id="next">Next</button>
   </div>
-  <footer id="foot" hidden><p>The questions, descriptions, and examples are taken from the paper <em>A Framework and Checklist for Validity Threats in Foundation Model Research</em> (under review). Answers are stored only in your browser. Source: <a href="https://github.com/fmr-checklist/fmr-checklist.github.io">github.com/fmr-checklist/fmr-checklist.github.io</a>.</p></footer>
+  <footer id="foot" hidden><p>The questions, descriptions, and examples are taken from the paper <em>A Framework and Checklist for Validity Threats in Foundation Model Research</em> (under review). Answers are stored only in your browser. Source: <a href="https://github.com/sbordt/fmr-checklist">github.com/sbordt/fmr-checklist</a>.</p></footer>
 </div>
 <div id="tip" role="tooltip" hidden></div>
 
@@ -414,7 +414,7 @@
       if (t.gate) L.push('- ' + t.name + ' [' + (val('gate:' + t.id) || '…') + ']' + (val('gate:' + t.id) === 'Yes' ? ': ' + (val('note:' + t.id) || '…') : ''));
       else L.push('- ' + t.name + ': ' + (val('note:' + t.id) || '…'));
     });
-    L.push('', '_Filled with the validity checklist at https://fmr-checklist.github.io/_');
+    L.push('', '_Filled with the validity checklist at https://sbordt.github.io/fmr-checklist/_');
     return L.join('\n');
   }
   function download(name, content, type) {
