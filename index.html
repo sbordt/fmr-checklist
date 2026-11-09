@@ -225,6 +225,7 @@
       question: 'Does the paper discuss and establish that its main result reflects a real effect, and is not due to noise, a poorly fitted curve, or picking the best of many comparisons?',
       allowNA: false,
       yesRule: 'A [Yes] requires the paper to address each applicable point above. Answer [No] if any applicable point is undiscussed, and name it.',
+      yesRuleNew: true, // not from the paper; shown in pink
       naMeans: ''
     },
     IV: {
@@ -363,7 +364,7 @@
   function setField(name, v) { const el = $('[name="' + name + '"]'); if (el) el.value = v || ''; }
   function checked(name) { const el = $('input[name="' + name + '"]'); return !!(el && el.checked); }
   function setChecked(name, v) { const el = $('input[name="' + name + '"]'); if (el) el.checked = !!v; }
-  function title(id) { const h = $('#' + id + ' h3'); return h ? h.textContent.replace(/\s+/g, ' ').trim() : id; }
+  function title(id) { const h = $('#' + id + ' h3'); return h ? h.textContent.replace(/\s+/g, ' ').trim().replace(/^([A-Z0-9]+\.)(\S)/, '$1 $2') : id; }
   function escapeHtml(s) { return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 
   function a8Types() { return PART_B.filter((t) => answer('A8') === 'Yes' && checked('A8-' + t)); }
@@ -430,7 +431,7 @@
         html += '<label class="discussed"><input type="checkbox" data-discussed="' + t.id + '"' + (state.discussed[t.id] ? ' checked' : '') + '> Properly discussed in the paper</label>';
         html += '</div>';
       });
-      html += '<p class="muted desc">' + escapeHtml(v.yesRule) + (v.allowNA && active ? '' : (v.allowNA ? '' : '')) + '</p>';
+      html += '<p class="' + (v.yesRuleNew ? 'new' : 'muted') + ' desc">' + escapeHtml(v.yesRule) + '</p>';
       html += '<p class="suggest" data-suggest="' + type + '"></p>';
       html += '<div class="answer">';
       ['Yes', 'No'].concat(v.allowNA ? ['NA'] : []).forEach((opt) => {
@@ -453,7 +454,11 @@
       el.className = 'suggest';
       if (!items.length) { el.textContent = ''; return; }
       if (!open.length) { el.classList.add('yes'); el.textContent = 'All applicable threats are checked as discussed, which supports a [Yes].'; }
-      else { el.classList.add('no'); el.textContent = 'Not yet checked as discussed: ' + open.map((t) => t.name.toLowerCase()).join('; ') + '. If the paper leaves any of them undiscussed, answer [No] and name it.'; }
+      else {
+        const names = [];
+        open.forEach((t) => { const n = t.name.toLowerCase() + (t.via.length ? ' (' + t.via.join(', ') + ')' : ''); if (!names.includes(n)) names.push(n); });
+        el.classList.add('no'); el.textContent = 'Not yet checked as discussed: ' + names.join('; ') + '. If the paper leaves any of them undiscussed, answer [No] and name it.';
+      }
     });
   }
 
