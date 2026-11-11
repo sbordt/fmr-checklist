@@ -3,29 +3,34 @@
 Source of the website at **https://sbordt.github.io/fmr-checklist/**: a checklist for
 authors and reviewers of foundation model research, filled in step by step.
 
-* Nine pages: the research question; the approximation strategies of the
+* Ten pages: the research question; the approximation strategies of the
   experiment, one Yes/No question each (proxy models, proxy treatments, proxy
   outcomes, observational data, units within a single training run, theoretical
-  controls, other approximations); and statistical validity, where noise always
-  has to be addressed and few or dependent units and the best of many
-  comparisons are asked with a Yes/No first.
-* A [Yes] asks which parts of the experiments use the strategy and unfolds the
-  validity threats it gives rise to, key threats first, each with a description
-  and one example, and a box asking how the paper addresses the threat.
+  controls, other approximations); statistical validity, which all papers have
+  to address; and other threats.
+* A [Yes] asks which experiments use the strategy and unfolds the validity
+  threats that come with it, grouped by validity type, each with the bullet
+  point and the example of the paper's checklist and a box asking how the paper
+  addresses the threat. Threats that may or may not occur (for example, the best
+  of many comparisons) are asked with a Yes/No first.
+* Every threat carries the label of the corresponding bullet point in the paper
+  (for example, A5-IV1), which links it to the paper's table of assumptions.
+* Reviewers can switch on a [Yes] / [Partly] / [No] verdict for every threat on
+  the first page.
 * The summary exports the result as Markdown or JSON; answers are kept in the
   browser only.
 
-The questions, descriptions, and examples are taken from the paper *A Framework
-and Checklist for Validity Threats in Foundation Model Research* (under review).
-Text shown in pink on the page was added while drafting and is not from the
-paper; it is marked so that it can be reviewed.
+The questions, descriptions, examples, and threats are taken from the checklist
+appendix of the paper *A Framework and Checklist for Validity Threats in
+Foundation Model Research* (under review). Text shown in pink on the page, if
+any, was added while drafting and is not from the paper.
 
 ## Files
 
 | File | Contents |
 |---|---|
-| `index.html` | The page. No external dependencies. The strategy-to-threat graph is the `THREATS` table in the script; terms the checklist defines are underlined and show their definition on hover (the `GLOSSARY` table). |
-| `checklist.md` | The checklist as plain Markdown, in the form of the paper's appendix (Part A and Part B). |
+| `index.html` | The page. No external dependencies. The threats are the `THREATS` table in the script, one entry per labeled bullet point of the paper; terms the checklist defines are underlined and show their definition on hover (the `GLOSSARY` table). |
+| `checklist.md` | The checklist as plain Markdown, in the form of the paper's appendix (Part A, Part B, other threats). |
 
 ## Development
 
