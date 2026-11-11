@@ -34,4 +34,7 @@ any, was added while drafting and is not from the paper.
 
 The site is static: open `index.html` in a browser, or serve the folder with
 `python3 -m http.server`. GitHub Pages publishes the `main` branch from the
-repository root.
+repository root. Opening the page with `?reset` (for example
+`https://sbordt.github.io/fmr-checklist/?reset`) clears the saved answers and
+starts on the first page; "Start over" in the header does the same after a
+confirmation.

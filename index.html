@@ -24,6 +24,8 @@
   .app { max-width: 680px; margin: 0 auto; min-height: 100%; padding: 20px 16px 24px; display: flex; flex-direction: column; }
   .top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: .9rem; color: var(--muted); }
   .top .brand { font-weight: 600; color: var(--fg); }
+  .top .right { display: flex; gap: 14px; align-items: baseline; white-space: nowrap; }
+  .top button.link { background: none; border: 0; padding: 0; font-size: .9rem; color: var(--muted); text-decoration: underline; cursor: pointer; }
   .bar { height: 4px; background: var(--line); border-radius: 2px; margin: 8px 0 24px; overflow: hidden; }
   .bar > div { height: 100%; background: var(--accent); width: 0; transition: width .25s; }
   .screen { flex: 1; }
@@ -83,7 +85,7 @@
 </head>
 <body>
 <div class="app">
-  <div class="top"><span class="brand">Validity Checklist for Foundation Model Research</span><span id="progress-label"></span></div>
+  <div class="top"><span class="brand">Validity Checklist for Foundation Model Research</span><span class="right"><span id="progress-label"></span><button type="button" class="link" id="reset-top" title="Clear all answers and start on page 1">Start over</button></span></div>
   <div class="bar"><div id="progress-bar"></div></div>
   <div class="screen" id="screen"></div>
   <div class="nav">
@@ -559,14 +561,19 @@
     else if (el.id === 'download-md') download('validity-checklist.md', markdown(), 'text/markdown');
     else if (el.id === 'download-json') download('validity-checklist.json', JSON.stringify(state, null, 2), 'application/json');
     else if (el.id === 'print') window.print();
-    else if (el.id === 'reset') {
-      if (!window.confirm('Clear all answers and start over?')) return;
-      Object.keys(state).forEach((k) => delete state[k]);
-      Object.assign(state, { step: 'intro' });
-      try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignore */ }
-      render();
-    }
+    else if (el.id === 'reset') resetAll(true);
   });
+  // Clears all answers and starts again on the first page; also reachable as
+  // "Start over" in the header on every page, and without a dialog by opening
+  // the page with ?reset (for testing).
+  function resetAll(ask) {
+    if (ask && !window.confirm('Clear all answers and start over?')) return;
+    Object.keys(state).forEach((k) => delete state[k]);
+    Object.assign(state, { step: 'intro' });
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignore */ }
+    render();
+  }
+  $('#reset-top').addEventListener('click', () => resetAll(true));
 
   // Tooltips for glossary terms (hover, keyboard focus, or tap).
   const tip = $('#tip');
@@ -588,6 +595,10 @@
   document.addEventListener('focusout', (ev) => { const t = ev.target.closest && ev.target.closest('.term'); if (t) hideTip(); });
   document.addEventListener('click', (ev) => { const t = ev.target.closest && ev.target.closest('.term'); if (t) { if (tip.hidden) showTip(t); else hideTip(); } else if (!tip.hidden) hideTip(); });
 
+  if (/[?&]reset\b/.test(window.location.search)) {
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignore */ }
+    try { window.history.replaceState(null, '', window.location.pathname); } catch (e) { /* ignore */ }
+  }
   load();
   render();
 })();
