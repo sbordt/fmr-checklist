@@ -9,14 +9,12 @@ authors and reviewers of foundation model research, filled in step by step.
   controls, other approximations); statistical validity, which all papers have
   to address; and other threats.
 * A [Yes] asks which experiments use the strategy and unfolds the validity
-  threats that come with it, grouped by validity type, each with the bullet
-  point and the example of the paper's checklist and a box asking how the paper
-  addresses the threat. Threats that may or may not occur (for example, the best
-  of many comparisons) are asked with a Yes/No first.
+  threats that come with it as numbered cards, each with the bullet point and
+  the example of the paper's checklist and a box asking how the paper addresses
+  the threat. Threats that may or may not occur (for example, the best of many
+  comparisons) are asked with a Yes/No first.
 * Every threat carries the label of the corresponding bullet point in the paper
   (for example, A5-IV1), which links it to the paper's table of assumptions.
-* Reviewers can switch on a [Yes] / [Partly] / [No] verdict for every threat on
-  the first page.
 * The summary exports the result as Markdown or JSON; answers are kept in the
   browser only.
 

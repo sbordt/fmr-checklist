@@ -10,12 +10,12 @@
     color-scheme: light dark;
     --bg: #ffffff; --fg: #1d1d1f; --muted: #66676d; --line: #e4e4e7; --soft: #f6f6f8;
     --accent: #1f4e79; --yes: #2e7d32; --no: #c62828; --na: #8a8f98; --new: #d6177f;
-    --label: #00796b; --reviewer: #d95f02;
+    --label: #00796b;
   }
   @media (prefers-color-scheme: dark) {
     :root { --bg: #141416; --fg: #e9e9ec; --muted: #9b9ba3; --line: #2d2d33; --soft: #1c1c21;
             --accent: #8ab4f8; --yes: #7ccc80; --no: #ef7070; --na: #a0a5ad; --new: #ff5fb0;
-            --label: #4db6ac; --reviewer: #ffa04d; }
+            --label: #4db6ac; }
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; }
@@ -49,23 +49,17 @@
                                border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
   label.field { display: block; margin: 12px 0; }
   label.field > span { display: block; font-size: .92rem; color: var(--muted); margin-bottom: 4px; }
-  label.check { display: flex; gap: 10px; align-items: flex-start; margin: 14px 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; }
-  label.check input { margin-top: 5px; }
   .note { border-left: 3px solid var(--line); padding-left: 12px; color: var(--muted); font-size: .95rem; margin: 12px 0; }
   .sub { margin-top: 22px; padding-top: 12px; border-top: 1px solid var(--line); }
-  .group { font-size: .8rem; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); margin: 22px 0 2px; }
-  .group + .note { margin-top: 4px; }
   .threat { background: var(--soft); border-radius: 10px; padding: 12px 14px; margin: 10px 0; }
   .threat h3 { margin: 0 0 6px; }
   .tag { display: inline-block; font-size: .78rem; font-weight: 500; color: var(--accent); border: 1px solid var(--accent);
          border-radius: 999px; padding: 0 8px; margin-left: 6px; vertical-align: middle; }
   .label { display: inline-block; font-size: .78rem; font-weight: 600; color: var(--label); border: 1px solid var(--label);
            border-radius: 4px; padding: 0 6px; margin-left: 6px; vertical-align: middle; letter-spacing: .02em; }
-  .verdict { margin: 10px 0 2px; color: var(--reviewer); font-size: .95rem; }
-  .verdict .answer { margin: 6px 0 0; }
-  .verdict .answer label { color: var(--reviewer); }
-  .verdict .answer label:has(input:checked) { border-color: var(--reviewer); box-shadow: inset 0 0 0 1px var(--reviewer); }
-  .nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--line); }
+  /* Sticks to the bottom of the window, so that Back and Next are reachable without scrolling. */
+  .nav { position: sticky; bottom: 0; z-index: 5; background: var(--bg); display: flex; justify-content: space-between; align-items: center; gap: 12px;
+         margin: 28px -16px 0; padding: 12px 16px; border-top: 1px solid var(--line); }
   button { font: inherit; font-size: .95rem; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--line);
            background: var(--soft); color: var(--fg); cursor: pointer; }
   button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
@@ -129,25 +123,26 @@
       'The target model is the model that the paper’s conclusions are about. It may be larger, or trained differently, than the model that the paper actually trains. There can be multiple target models, for example, when a paper claims that transformers can perform length generalization.',
       'A unit is the thing that does or does not receive the treatment and on which the outcome is measured. This can be a training run, a dataset, a document, or a token. Usually, there are multiple units in a single experiment. Units with the treatment form the treatment group, units without it the control group.'
     ],
-    example: 'How does the MMLU benchmark score (outcome) of Olmo 3 32B (target model) change when we remove all math competition data from its pretraining data (treatment)?'
+    example: 'How does the MMLU benchmark score (outcome) of Olmo 3 32B (target model) change when we remove all math competition data from its pretraining data (treatment)?',
+    defines: ['treatment', 'outcome', 'target model', 'unit', 'treatment group', 'control group']
   };
   const QUESTIONS_A = {
-    A2: { q: 'Do the experiments involve proxy models?', which: 'Which experiments are performed with proxy models?',
+    A2: { defines: ['proxy model'], q: 'Do the experiments involve proxy models?', which: 'Which experiments are performed with proxy models?',
           desc: 'A proxy model is a model that is smaller or cheaper to train than the target model, and that stands in for it in the experiments.',
           example: 'A single 1B model is used instead of a 32B model, or a series of smaller models and a scaling law are used to predict behavior at larger scale.' },
-    A3: { q: 'Do the experiments involve proxy treatments?', which: 'Which experiments are performed with proxy treatments?',
+    A3: { defines: ['proxy treatment'], q: 'Do the experiments involve proxy treatments?', which: 'Which experiments are performed with proxy treatments?',
           desc: 'A proxy treatment replaces the expensive treatment that the paper cares about with a stand-in that is cheaper to compute, observe or implement.',
           example: 'A model is fine-tuned on private data instead of pretrained on it, or per-domain loss is used as a stand-in for unobserved data-mixture weights.' },
-    A4: { q: 'Do the experiments involve proxy outcomes?', which: 'Which proxy outcomes does the paper measure?',
+    A4: { defines: ['proxy outcome'], q: 'Do the experiments involve proxy outcomes?', which: 'Which proxy outcomes does the paper measure?',
           desc: 'A proxy outcome replaces the outcome the paper cares about with a cheaper stand-in.',
           example: 'The training loss stands in for performance on a task that we care about, or a small subset of benchmark questions stand in for the full benchmark.' },
-    A5: { q: 'Do the experiments involve observational data?', which: 'Which experiments involve observational data?',
+    A5: { defines: ['observational data'], q: 'Do the experiments involve observational data?', which: 'Which experiments involve observational data?',
           desc: 'Data is experimental if the researchers decided which units receive the treatment (they ran the training runs, ablations, or sweeps themselves). It is observational if the runs already existed and someone else made those decisions, so the researchers did not control and do not know how the treatment was assigned.',
           example: 'Relating recipe choices to benchmark scores across publicly released models; analyzing released checkpoints of an existing model suite; using leaderboards or model cards.' },
     A6: { q: 'Do the experiments treat elements of a single training run as independent units?', which: 'Which experiments, and what are the units?',
           desc: 'This strategy emulates two or more training runs from a single run: elements of the run (documents, tokens, subwords, …) are treated as independently treatable units, each with its own treatment status and outcome.',
           example: 'Documents in the training set form the treatment group, held-out documents the control group, and the model’s loss on each document is its outcome.' },
-    A7: { q: 'Do the experiments use theoretical controls?', which: 'Which experiments use theoretical controls?',
+    A7: { defines: ['theoretical control'], q: 'Do the experiments use theoretical controls?', which: 'Which experiments use theoretical controls?',
           desc: 'A theoretical control is an outcome that was not measured but computed from theory: the paper analytically approximates what the outcome would have been under the treatment or under the control, and compares against that.',
           example: 'Influence functions analytically approximating “what if this data point were not in the training data”.' },
     A8: { q: 'Do the experiments involve other approximations?', which: 'Which other approximations are performed?',
@@ -164,27 +159,22 @@
       'Use this field if the paper uses a novel approximation strategy and you are unsure about the validity types.'
     ]
   };
-  // The four validity types of Part B: the question of the paper, and the
-  // bullet points that do not belong to one strategy.
+  // The four validity types of Part B with the question of the paper (shown
+  // under "other approximations").
   const VALIDITY = {
     SV: { name: 'Statistical validity',
-          question: 'How does the paper discuss and establish that its main result reflects a real effect, and is not due to noise, a poorly fitted curve, or picking the best of many comparisons?',
-          general: [] },
+          question: 'How does the paper discuss and establish that its main result reflects a real effect, and is not due to noise, a poorly fitted curve, or picking the best of many comparisons?' },
     IV: { name: 'Internal validity',
-          question: 'How does the paper discuss and establish that its main result is a genuine causal effect of the treatment?',
-          general: ['If treatments are assigned to separate, independent training runs and treatment and control groups differ in nothing but the treatment, then the measured effect reflects a causal effect of the treatment. If there is some other difference between the treatment and control groups or an influence of individual units on each other, then the association between treatment and outcome is only causal under identifying assumptions.'] },
+          question: 'How does the paper discuss and establish that its main result is a genuine causal effect of the treatment?' },
     EV: { name: 'External validity',
-          question: 'If the paper draws conclusions about a target model or setting that are different from what is studied, how does the paper discuss and establish the validity of the conclusions about the target setting?',
-          general: ['This could be addressed by verification in the target setting, an argument about established behavior (for example, the scaling behavior of the quantity is known from the literature), or claims explicitly limited to what is studied.'] },
+          question: 'If the paper draws conclusions about a target model or setting that are different from what is studied, how does the paper discuss and establish the validity of the conclusions about the target setting?' },
     CV: { name: 'Construct validity',
-          question: 'If the implemented treatment or the measured outcome differs from the treatment or outcome named in the conclusions, how does the paper discuss and establish whether findings about the one carry over to the other?',
-          general: ['This could be addressed by an argument that the effects coincide (treatment) or that the two outcomes move together (outcome), or claims aligned with what was implemented and measured.',
-                    'The critical question is whether the treatment as implemented and the outcome as measured really capture the concepts named in the research question and conclusions. The concrete implementation of a concept is its operationalization (for example, a paper might operationalize the concept “reasoning ability” by measuring a benchmark score).'] }
+          question: 'If the implemented treatment or the measured outcome differs from the treatment or outcome named in the conclusions, how does the paper discuss and establish whether findings about the one carry over to the other?' }
   };
 
   // One entry per bullet point (or per label, where two bullet points share a
   // label) of Part B of the paper, in the order of the paper's table of
-  // assumptions. trigger: the Part A question whose [Yes] unfolds it, or 'SV'
+  // assumptions; the cards are numbered in this order on each page. trigger: the Part A question whose [Yes] unfolds it, or 'SV'
   // for the bullet points that apply to all papers. name: the row of the
   // table. items: the bullet points, each with its example. gate: a Yes/No
   // question for a threat that may or may not occur; the box appears after
@@ -214,13 +204,13 @@
                 example: 'An improvement in validation loss is not always guaranteed to improve downstream performance.' }] },
 
     // ---------------- Observational approach ----------------
-    { id: 'A5-IV1', label: 'A5-IV1', type: 'IV', trigger: 'A5', name: 'Exchangeability',
+    { id: 'A5-IV1', label: 'A5-IV1', type: 'IV', trigger: 'A5', name: 'Exchangeability', defines: ['exchangeability', 'confounder', 'selection bias'],
       items: [{ desc: 'If the experiments involve observational data, then the paper needs to establish that treatment and control groups do not differ systematically in anything other than the treatment. This may fail due to confounders (third factors that influence both which units get the treatment and their outcome) or selection bias (units enter the sample in a way that depends on treatment and outcome, e.g., only the best-performing models are published). The paper may adjust for measured confounders, which requires that groups are comparable once those confounders are held fixed.',
                 example: 'Architecture and training data composition are confounded by calendar time; a correlation between architecture and benchmark score may actually be caused by data composition.' }] },
-    { id: 'A5-IV2', label: 'A5-IV2', type: 'IV', trigger: 'A5', name: 'Positivity',
+    { id: 'A5-IV2', label: 'A5-IV2', type: 'IV', trigger: 'A5', name: 'Positivity', defines: ['positivity'],
       items: [{ desc: 'If the experiments involve observational data, then the paper needs to establish that every treatment value the paper draws conclusions about occurs in the sample among otherwise comparable units. When other variables are adjusted for, this has to be the case within every combination of those variables. Effects of treatment values that no unit received can only be extrapolated, not estimated.',
                 example: 'If a document is not included in any training run in the sample, we cannot estimate its effect.' }] },
-    { id: 'A5-IV3', label: 'A5-IV3', type: 'IV', trigger: 'A5', name: 'SUTVA',
+    { id: 'A5-IV3', label: 'A5-IV3', type: 'IV', trigger: 'A5', name: 'SUTVA', defines: ['SUTVA', 'interference', 'consistency'],
       items: [{ desc: 'If the experiments involve observational data, then the paper needs to establish that each unit’s outcome depends only on its own treatment, not on the treatments other units received.',
                 example: 'This might not be the case when units share training data or evaluation pools across runs.' },
               { desc: 'If the experiments involve observational data, then the paper needs to establish that all treated units received the same version of the treatment.',
@@ -238,12 +228,12 @@
       items: [{ desc: 'If the experiments involve observational data, then they might implicitly involve proxy outcomes or proxy treatments, because the treatment and outcome of interest are often not documented. If this is the case, then the construct validity of the proxies needs to be addressed.' }] },
 
     // ---------------- Within-run control outcomes ----------------
-    { id: 'A6-IV1', label: 'A6-IV1', type: 'IV', trigger: 'A6', name: 'Exchangeability',
+    { id: 'A6-IV1', label: 'A6-IV1', type: 'IV', trigger: 'A6', name: 'Exchangeability', defines: ['exchangeability', 'parallel trends'],
       items: [{ desc: 'If the experiments treat elements of a single training run as independent units, then the paper needs to establish that the treated and the control units do not differ systematically.',
                 example: 'The within-run estimate overestimates memorization when the treated units are sampled randomly, and the untreated units reflect near training duplicates, a particular domain (code), or especially hard examples.' },
               { desc: 'If the paper uses difference-in-differences estimators, instrumental variables, or a regression discontinuity design, then the paper needs to discuss the assumptions of that strategy.',
                 example: 'Difference-in-differences assumes parallel trends, that is, that treated and untreated units would have developed alike without the treatment.' }] },
-    { id: 'A6-IV2', label: 'A6-IV2', type: 'IV', trigger: 'A6', name: 'No interference', ask: 'interference between units',
+    { id: 'A6-IV2', label: 'A6-IV2', type: 'IV', trigger: 'A6', name: 'No interference', ask: 'interference between units', defines: ['interference'],
       items: [{ desc: INTERFERENCE,
                 example: 'When we add additional documents to the training data, this can change the final loss of documents that were previously in the training data.' }] },
     { id: 'A6-EV1', label: 'A6-EV1', type: 'EV', trigger: 'A6', name: 'External validity across units',
@@ -251,7 +241,7 @@
                 example: 'A small average memorization effect for a group of documents is compatible with strong memorization of individual documents.' }] },
 
     // ---------------- Theoretical control outcomes ----------------
-    { id: 'A7-IV1', label: 'A7-IV1', type: 'IV', trigger: 'A7', name: 'No interference', ask: 'interference between units',
+    { id: 'A7-IV1', label: 'A7-IV1', type: 'IV', trigger: 'A7', name: 'No interference', ask: 'interference between units', defines: ['interference'],
       items: [{ desc: INTERFERENCE,
                 example: 'Training on canary i may affect the outcome for canary j.' }] },
     { id: 'A7-SV1', label: 'A7-SV1', type: 'SV', trigger: 'A7', name: 'Statistical validity',
@@ -355,6 +345,8 @@
     }).join('');
   }
   const T = (text) => wrapTerms(esc(text));
+  // Terms that the current screen defines itself get no tooltip there.
+  const defined = (keys) => (keys || []).forEach((k) => seenTerms.add(k));
   const lc = (name) => (/^[A-Z]{2,}/.test(name) ? name : name.charAt(0).toLowerCase() + name.slice(1));
 
   // ------------------------------------------------------------------
@@ -403,38 +395,23 @@
   }
   function guide(items) { return '<ul class="guide">' + items.map((g) => '<li>' + T(g) + '</li>').join('') + '</ul>'; }
   function example(text) { return '<p class="example"><strong>Example:</strong> ' + T(text) + '</p>'; }
-  // Reviewers may indicate whether the paper does or does not discuss a threat.
-  function verdict(id) {
-    if (!state.reviewer) return '';
-    return '<div class="verdict">' + T('Does the paper discuss this threat?') + radios('verdict:' + id, ['Yes', 'Partly', 'No']) + '</div>';
-  }
   function boxFor(t) { return t.box || ('How does the paper address ' + (t.ask || lc(t.name)) + '?'); }
-  function threatCard(t, opts) {
+  function threatCard(t, n, opts) {
+    defined(t.defines);
     const type = VALIDITY[t.type].name;
-    const tag = (opts && opts.grouped) || t.name === type ? '' : ' <span class="tag">' + esc(type) + '</span>';
+    const tag = (opts && opts.noTag) || t.name.toLowerCase().startsWith(type.toLowerCase()) ? '' : ' <span class="tag">' + esc(type) + '</span>';
     const label = t.label ? ' <span class="label" title="Label of this threat in the paper">' + esc(t.label) + '</span>' : '';
-    let html = '<div class="threat"><h3>' + esc(t.name) + tag + label + '</h3>';
+    let html = '<div class="threat"><h3>' + n + '. ' + esc(t.name) + tag + label + '</h3>';
     t.items.forEach((it) => { html += '<p>' + T(it.desc) + '</p>' + (it.example ? example(it.example) : ''); });
     if (t.gate) html += '<p>' + T(t.gate) + '</p>' + radios('gate:' + t.id, ['Yes', 'No']);
-    if (isOpen(t)) html += textarea('note:' + t.id, boxFor(t), 2) + verdict(t.id);
+    if (isOpen(t)) html += textarea('note:' + t.id, boxFor(t), 2);
     return html + '</div>';
-  }
-  // The threats of one strategy, grouped by validity type, with the general
-  // bullet points of that type.
-  function threatGroups(items) {
-    const types = [];
-    items.forEach((t) => { if (!types.includes(t.type)) types.push(t.type); });
-    return types.map((type) => {
-      const v = VALIDITY[type];
-      return '<p class="group">' + esc(v.name) + '</p>' + v.general.map((g) => '<p class="note">' + T(g) + '</p>').join('') +
-        items.filter((t) => t.type === type).map((t) => threatCard(t, { grouped: true })).join('');
-    }).join('');
   }
   function screenSV() {
     return pageHead('SV', 'Statistical validity') +
       '<p>' + T(VALIDITY.SV.question) + '</p>' +
       '<p class="note">All papers have to address this question.</p>' +
-      '<div class="sub">' + threatsFor('SV').map((t) => threatCard(t, { grouped: true })).join('') + '</div>';
+      '<div class="sub">' + threatsFor('SV').map((t, i) => threatCard(t, i + 1, { noTag: true })).join('') + '</div>';
   }
   function screenOT() {
     let html = pageHead('OT', 'Other threats') + '<p>' + T(OTHER.q) + '</p>' + guide(OTHER.guidelines) + radios('OT', ['Yes', 'No']);
@@ -443,9 +420,9 @@
   }
   // Under "other approximations": one card per type of validity, with the
   // question of the paper for that type.
-  function a8Card(type) {
+  function a8Card(type, i) {
     const v = VALIDITY[type];
-    return '<div class="threat"><h3>' + esc(v.name) + '</h3>' + textarea('note:A8-' + type, v.question, 2) + verdict('A8-' + type) + '</div>';
+    return '<div class="threat"><h3>' + (i + 1) + '. ' + esc(v.name) + '</h3>' + textarea('note:A8-' + type, v.question, 2) + '</div>';
   }
 
   function screenIntro() {
@@ -456,10 +433,10 @@
       '<li>For the most common approximation strategies, the checklist asks whether this strategy is used in the paper. A [Yes] unfolds the threats to the validity of the strategy. Every paper is required to <em>properly discuss</em> these threats: it might name them and argue them away, test them, bound them, or limit its claims.</li>' +
       '<li>Authors must discuss all relevant threats to the validity of the employed research strategies. Reviewers may instead indicate whether a paper does or does not discuss a particular threat.</li>' +
       '<li>At the end, the result can be exported as Markdown. Answers are stored only in your browser.</li>' +
-      '</ul>' +
-      '<label class="check"><input type="checkbox" name="reviewer"' + (state.reviewer ? ' checked' : '') + '> <span>Reviewer: add a [Yes] / [Partly] / [No] verdict to every threat, indicating whether the paper discusses it.</span></label>';
+      '</ul>';
   }
   function screenA1() {
+    defined(A1.defines);
     return pageHead('A1', A1.q) +
       textarea('A1-rq', A1.rq, 3) +
       textarea('A1-concl', A1.concl, 3) +
@@ -467,13 +444,14 @@
   }
   function screenA(a) {
     const q = QUESTIONS_A[a];
+    defined(q.defines);
     let html = pageHead(a, q.q) + '<p>' + T(q.desc) + '</p>' + example(q.example) +
       (q.route ? '<p class="note">' + T(q.route) + '</p>' : '') +
       radios(a, ['Yes', 'No']);
     if (val(a) === 'Yes') {
       html += textarea(a + '-which', q.which, 2);
       if (a === 'A8') html += '<div class="sub">' + PART_B.map(a8Card).join('') + '</div>';
-      else html += '<div class="sub">' + threatGroups(threatsFor(a)) + '</div>';
+      else html += '<div class="sub">' + threatsFor(a).map((t, i) => threatCard(t, i + 1)).join('') + '</div>';
     }
     return html;
   }
@@ -493,11 +471,10 @@
   // Export
   // ------------------------------------------------------------------
   function markdown() {
-    const v = (id) => (state.reviewer && val('verdict:' + id) ? ' [' + val('verdict:' + id) + ']' : '');
-    const line = (t) => {
-      const head = '- ' + (t.label ? '[' + t.label + '] ' : '') + t.name;
-      if (t.gate) return head + ' [' + (val('gate:' + t.id) || '…') + ']' + (isOpen(t) ? v(t.id) + ': ' + (val('note:' + t.id) || '…') : '');
-      return head + v(t.id) + ': ' + (val('note:' + t.id) || '…');
+    const line = (t, i) => {
+      const head = (i + 1) + '. ' + (t.label ? '[' + t.label + '] ' : '') + t.name;
+      if (t.gate) return head + ' [' + (val('gate:' + t.id) || '…') + ']' + (isOpen(t) ? ': ' + (val('note:' + t.id) || '…') : '');
+      return head + ': ' + (val('note:' + t.id) || '…');
     };
     const L = ['# Validity checklist', '', '## 1. ' + A1.q, '', 'Research question: ' + (val('A1-rq') || '…'), '', 'Conclusions: ' + (val('A1-concl') || '…'), ''];
     QUESTIONS.forEach((a) => {
@@ -505,12 +482,12 @@
       L.push('## ' + (ORDER.indexOf(a) + 1) + '. ' + q.q + ' [' + (val(a) || '…') + ']', '');
       if (val(a) !== 'Yes') return;
       L.push(q.which + ' ' + (val(a + '-which') || '…'), '');
-      if (a === 'A8') PART_B.forEach((type) => { if (val('note:A8-' + type) || val('verdict:A8-' + type)) L.push('- ' + VALIDITY[type].name + v('A8-' + type) + ': ' + (val('note:A8-' + type) || '…')); });
-      else threatsFor(a).forEach((t) => L.push(line(t)));
+      if (a === 'A8') PART_B.forEach((type, i) => { if (val('note:A8-' + type)) L.push((i + 1) + '. ' + VALIDITY[type].name + ': ' + val('note:A8-' + type)); });
+      else threatsFor(a).forEach((t, i) => L.push(line(t, i)));
       L.push('');
     });
     L.push('## ' + (ORDER.indexOf('SV') + 1) + '. Statistical validity', '');
-    threatsFor('SV').forEach((t) => L.push(line(t)));
+    threatsFor('SV').forEach((t, i) => L.push(line(t, i)));
     L.push('', '## ' + (ORDER.indexOf('OT') + 1) + '. Other threats [' + (val('OT') || '…') + ']', '');
     if (val('OT') === 'Yes') L.push(OTHER.which + ' ' + (val('OT-which') || '…'), '');
     L.push('_Filled with the validity checklist at https://sbordt.github.io/fmr-checklist/_');
@@ -573,9 +550,6 @@
       state[el.name] = el.value;
       save();
       render({ keepScroll: true }); // unfold or fold the threats
-    } else if (el.type === 'checkbox' && el.name === 'reviewer') {
-      state.reviewer = el.checked;
-      save();
     }
   });
   $('#screen').addEventListener('click', async (ev) => {
