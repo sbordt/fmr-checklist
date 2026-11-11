@@ -13,8 +13,6 @@ authors and reviewers of foundation model research, filled in step by step.
   the example of the paper's checklist and a box asking how the paper addresses
   the threat. Threats that may or may not occur (for example, the best of many
   comparisons) are asked with a Yes/No first.
-* Every threat carries the label of the corresponding bullet point in the paper
-  (for example, A5-IV1), which links it to the paper's table of assumptions.
 * The summary exports the result as Markdown or JSON; answers are kept in the
   browser only.
 
@@ -27,13 +25,16 @@ any, was added while drafting and is not from the paper.
 
 | File | Contents |
 |---|---|
-| `index.html` | The page. No external dependencies. The threats are the `THREATS` table in the script, one entry per labeled bullet point of the paper; terms the checklist defines are underlined and show their definition on hover (the `GLOSSARY` table). |
+| `content.js` | **All texts of the checklist**: the questions, descriptions, and examples of the pages, the threats (one entry per bullet point of the paper's checklist, with its example and the question above the answer box), the texts of the summary, and the glossary shown on hover. Edit this file to change the wording; the page picks it up on reload. Every text stands between backticks, so quotes need no escaping. |
+| `example.js` | The filled example (the case study of Ruan et al., 2024), loaded by the link on the first page or by opening the page with `?example`. |
+| `index.html` | The page: layout, navigation, the hover glossary, the summary, and the export. It contains no checklist text. |
 | `checklist.md` | The checklist as plain Markdown, in the form of the paper's appendix (Part A, Part B, other threats). |
 
 ## Development
 
 The site is static: open `index.html` in a browser, or serve the folder with
-`python3 -m http.server`. GitHub Pages publishes the `main` branch from the
+`python3 -m http.server`. After editing `content.js`, `node --check content.js`
+tells whether the file still parses (a stray backtick is the usual culprit). GitHub Pages publishes the `main` branch from the
 repository root. Opening the page with `?reset` (for example
 `https://sbordt.github.io/fmr-checklist/?reset`) clears the saved answers and
 starts on the first page; "Start over" in the header does the same after a
