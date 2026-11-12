@@ -579,6 +579,7 @@ const CONTENT = {
   glossary: {
     treatment: `The change to the training recipe whose effect we want to know. For example, adding math data to the pre-training mix. The control is the same setup without that change.`,
     outcome: `The property that we measured to see the effect of the treatment. For example, a benchmark score, the training loss, or whether a document is memorized.`,
+    'target model': `The model that the paper’s conclusions are about. It may be larger, or trained differently, than the model that the paper actually trains. For example, a paper trains 1B models but draws conclusions about 32B models.`,
     unit: `The thing that does or does not receive the treatment and on which the outcome is measured. For example, a training run, a dataset, a document, or a token. Usually, there are multiple units in a single experiment.`,
     'treatment group': `The units that received the treatment. For example, the documents in the training set.`,
     'control group': `The units that did not receive the treatment. For example, held-out documents that are not in the training set.`,
