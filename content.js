@@ -51,39 +51,50 @@ const CONTENT = {
       {
         heading: `The ideal experiment`,
         paragraphs: [
-          `Most research questions about foundation models are interventional: they ask what would happen to model behavior if some aspect of the training recipe (the data, the architecture, the optimizer) were changed. A foundation model is trained according to a particular training recipe, which encompasses all controllable parts of model training. Up to some uncontrollable random variation, the training recipe determines the foundation model along with a range of outcome measures (including upstream outcomes like the training loss, and downstream outcomes such as benchmark scores). A research question then asks about the effect of a treatment on the outcomes for a particular recipe: Would decreasing the learning rate improve downstream performance? Would adding a data source during mid-training improve reasoning behavior?`,
-          `The ideal way to answer such research questions would be a controlled experiment requiring several full training runs. At target scale, meaning for frontier models, such a controlled experiment is, however, computationally infeasible.`
+          `Most research questions about foundation models are interventional: they ask what would happen to model behavior if some aspect of the training recipe were changed. Up to some uncontrollable random variation, the training recipe determines the foundation model along with a range of outcome measures. This includes upstream outcomes like the training loss, and downstream outcomes such as benchmark scores. The research question asks about the effect of a treatment on the outcomes for a particular training recipe. For example, would decreasing the learning rate improve downstream performance? `,
+          `The ideal way to answer [[these]] research questions is a controlled experiment with several full training runs. However, the ideal experiment is often computationally infeasible, which gives rise to the need for approximative research strategies.`
         ]
       },
       {
         heading: `Research strategies`,
         paragraphs: [
-          `To work around this constraint, the community has developed various approximation strategies that study model behavior on a compute budget. What these strategies have in common is that they estimate the relevant treatment effect without performing the ideal experiment. Estimating treatment effects in this way is, however, generally only possible under assumptions.`
+          `In recent years, the community has developed various approximation strategies that study model behavior on a compute budget. What these strategies have in common is that they aim to estimate the treatment effect of the ideal experiment without actually performing the ideal experiment. Estimating treatment effects in this way is, however, only possible under assumptions.`
         ],
         subsections: [
           {
             heading: `Proxy models and scaling laws`,
             paragraphs: [
-              `In the proxy approach, a controlled experiment is performed, however some part of the experiment, the model, the treatment, or the outcome, is replaced with a proxy to make it computationally feasible. Proxy models replace the target recipe with a proxy recipe that is cheaper to train. The proxy recipe can have fewer parameters, fewer training tokens, or both. In its simplest form, the proxy approach assumes that the treatment effect does not depend on the considered scale. The more interesting scenario, however, is when the treatment effect depends on the scale in a way that is predictable. In this case, treatment effects and outcomes can be estimated with scaling laws.`
+              `Proxy models replace the target recipe with a proxy recipe that is cheaper to train[[, and the controlled experiment is performed with the proxy]]. The proxy recipe can have fewer parameters, fewer training tokens, or both. In its simplest form, [[this strategy]] assumes that the treatment effect does not depend on the considered scale. The more interesting scenario, however, is when the treatment effect depends on the scale in a way that is predictable. In this case, treatment effects and outcomes can be estimated with scaling laws.`
             ]
           },
           {
-            heading: `Proxy treatments and outcomes`,
+            heading: `Proxy treatments`,
             paragraphs: [
-              `Instead of replacing the model with a proxy, we can replace the treatment or outcome. One example of a proxy treatment is to fine-tune a model instead of re-training it from scratch. One example of a proxy outcome is to use a subset of a benchmark to estimate the full benchmark score, or the validation loss instead of task performance.`
+              `[[Proxy treatments keep the target recipe but replace the treatment with a stand-in that is cheaper to compute, observe or implement.]] One example of a proxy treatment is to fine-tune a model instead of re-training it from scratch.`
+            ]
+          },
+          {
+            heading: `Proxy outcomes`,
+            paragraphs: [
+              `[[Proxy outcomes replace the outcome with a cheaper stand-in.]] One example of a proxy outcome is to use a subset of a benchmark to estimate the full benchmark score, or the validation loss instead of task performance.`
             ]
           },
           {
             heading: `Observational data`,
             paragraphs: [
-              `The observational approach avoids training new models altogether and instead analyzes the meta-data of existing training runs. In recent works, the observational approach has been employed to derive scaling laws, to improve the pretraining data mix, and to predict benchmark performance from fewer samples.`
+              `The observational approach avoids training new models altogether and instead analyzes the meta-data of existing training runs. In recent works, [[it]] has been employed to derive scaling laws, to improve the pretraining data mix, and to predict benchmark performance from fewer samples.`
             ]
           },
           {
-            heading: `Single-run designs`,
+            heading: `[[Units within a single training run]]`,
             paragraphs: [
-              `Single-run approaches approximate the treatment effect with a single training run, by emulating several treatment and control runs from it. The within-run approach regards the training run as containing a set of independently treatable units with separate outcomes, thereby allowing us to form treatment and control populations within a single run. For example, to estimate the average effect of training on a document on the document’s loss, the within-run approach regards each document as a separate unit that can be independently assigned to the treatment group (the training data) or the control group (the validation data).`,
-              `A second approach, the theoretical control approach, derives the control outcomes analytically instead. One instance of this are influence functions, which are used to approximate the contribution of individual training examples to a particular prediction. Another is to inject signals into the training run that can be used to derive a mathematically guaranteed control: in privacy auditing, for example, “canary” data is randomly assigned to the training or validation set.`
+              `[[This strategy approximates]] the treatment effect with a single training run, by emulating several treatment and control runs from it. [[It]] regards the training run as containing a set of independently treatable units with separate outcomes, thereby allowing us to form treatment and control populations within a single run. For example, to estimate the average effect of training on a document on the document’s loss, each document [[is regarded]] as a separate unit that can be independently assigned to the treatment group (the training data) or the control group (the validation data).`
+            ]
+          },
+          {
+            heading: `[[Theoretical controls]]`,
+            paragraphs: [
+              `[[Theoretical controls derive]] the control outcomes analytically instead [[of measuring them]]. One instance of this are influence functions, which are used to approximate the contribution of individual training examples to a particular prediction. Another is to inject signals into the training run that can be used to derive a mathematically guaranteed control: in privacy auditing, for example, “canary” data is randomly assigned to the training or validation set.`
             ]
           }
         ]
@@ -91,8 +102,9 @@ const CONTENT = {
       {
         heading: `Validity threats`,
         paragraphs: [
-          `Violations of necessary assumptions in the estimation of treatment effects pose threats to the validity of research results. For example, if the results from smaller proxy experiments do not generalize across scale, then it is invalid to conclude from small-scale experiments about large-scale behavior. For this reason, it is important that the assumptions that underlie different research strategies are explicitly discussed. The checklist distinguishes four types of validity: statistical validity asks whether an estimate from a finite, noisy sample reliably reflects the true effect; internal validity, whether a reliable estimate reflects a genuine causal effect; external validity, whether a genuine causal effect transfers to the recipe that we care about; and construct validity, whether the operationalization of treatment and outcome actually reflects the constructs in the research question.`,
-          `This checklist first asks about the research question and identifies the approximation strategies of the central experiment. It then asks whether the given work properly discusses the validity threats that come with the chosen research strategies.`
+          `Violations of necessary assumptions in the estimation of treatment effects pose threats to the validity of research results. For example, if the results from smaller proxy experiments do not generalize across scale, then it is invalid to conclude from small-scale experiments about large-scale behavior. For this reason, it is important that the assumptions that underlie different research strategies are explicitly discussed.`,
+          `[[At a high level, there are four types of validity that can be threatened.]] Statistical validity asks whether an estimate from a finite, noisy sample reliably reflects the true effect; internal validity, whether a reliable estimate reflects a genuine causal effect; external validity, whether a genuine causal effect transfers to the recipe that we care about; and construct validity, whether the operationalization of treatment and outcome actually reflects the constructs in the research question. [[Every research strategy rests on its own assumptions, and each assumption, if violated, affects one of these types of validity.]]`,
+          `This checklist can be used to identify the research strategies of a paper and the implicit assumptions that come with them.`
         ]
       }
     ]
@@ -556,41 +568,46 @@ const CONTENT = {
     missing: `[missing]`
   },
 
-  // ---- Glossary: shown on hover where a term is used ----------------------
+  // ---- The glossary page (opens in its own tab from the header) ----------
+  glossaryPage: {
+    title: `Glossary`
+  },
+
+  // ---- Glossary: shown on hover where a term is used, and on the glossary page
+  // Style: a precise definition, then "For example, ...". The keys are
+  // written in lower case; the glossary page capitalizes the first letter.
   glossary: {
-    treatment: `The change to the training recipe or data whose effect the paper wants to know (e.g., adding math data to the pre-training mix, lowering the learning rate, including a document in the training set). The control is the same setup without that change.`,
-    outcome: `The property measured to see the effect (e.g., a benchmark score, the training loss, how well a document is memorized).`,
-    'target model': `The model that the paper’s conclusions are about. It may be larger, or trained differently, than the model that the paper actually trains. There can be multiple target models.`,
-    unit: `The thing that does or does not receive the treatment and on which the outcome is measured. This can be a training run, a dataset, a document, or a token. Usually, there are multiple units in a single experiment.`,
-    'treatment group': `The units with the treatment.`,
-    'control group': `The units without the treatment.`,
-    'training recipe': `All controllable parts of model training (the architecture, the training data, the optimizer, and so on).`,
-    'model family': `Models sharing central parts of their training recipe form a family.`,
-    'proxy model': `A model that is smaller or cheaper to train than the target model, and that stands in for it in the experiments.`,
-    'proxy treatment': `A stand-in for the expensive treatment that the paper cares about that is cheaper to compute, observe or implement.`,
-    'proxy outcome': `A cheaper stand-in for the outcome the paper cares about.`,
-    'scaling law': `A parametric function fitted to the outcomes or treatment effects of several proxy models of increasing scale, and used to predict the outcome or effect at the target scale.`,
-    'observational data': `Data from training runs that already existed and whose treatment assignment was decided by someone else, so the researchers did not control and do not know how the treatment was assigned.`,
-    'theoretical control': `An outcome that was not measured but computed from theory: the paper analytically approximates what the outcome would have been under the treatment or under the control, and compares against that.`,
-    canary: `Data with known statistical properties injected into training; the control outcome then follows from the distribution of the canaries.`,
-    'influence functions': `Analytical approximations of the contribution of individual training examples to a prediction; they replace the effect of removing one data point with the effect of reducing its weight.`,
-    exchangeability: `Treatment and control groups do not differ systematically in anything other than the treatment.`,
-    confounder: `A third factor that causes both the treatment and the outcome, thereby inducing an association between them even if the treatment has no causal effect. A prominent confounder in observational data is calendar time.`,
-    'selection bias': `A non-causal dependence between treatment and outcome induced by the process by which observations enter the sample, e.g., the decision to publish a model: only the best-performing models are published.`,
-    positivity: `Every treatment value the paper draws conclusions about occurs in the sample among otherwise comparable units.`,
-    SUTVA: `Stable unit treatment value assumption: no interference between units, and consistency between observed and potential outcomes.`,
-    interference: `A unit’s outcome depends on the treatments other units received, not only on its own treatment.`,
-    consistency: `All treated units received the same version of the treatment, so the observed outcome is the outcome of the treatment the paper names.`,
-    'potential outcome': `The outcome a unit would have under a given treatment, whether or not it actually received it.`,
-    'identifying assumptions': `The assumptions under which the association between treatment and outcome is causal: exchangeability, positivity, and SUTVA, or the assumptions of another identification strategy.`,
-    'difference-in-differences': `Comparing the change over time in treated units to that in untreated units.`,
+    treatment: `The change to the training recipe whose effect we want to know. For example, adding math data to the pre-training mix. The control is the same setup without that change.`,
+    outcome: `The property that we measured to see the effect of the treatment. For example, a benchmark score, the training loss, or whether a document is memorized.`,
+    unit: `The thing that does or does not receive the treatment and on which the outcome is measured. For example, a training run, a dataset, a document, or a token. Usually, there are multiple units in a single experiment.`,
+    'treatment group': `The units that received the treatment. For example, the documents in the training set.`,
+    'control group': `The units that did not receive the treatment. For example, held-out documents that are not in the training set.`,
+    'training recipe': `All controllable parts of model training, including the architecture, the training data, and the optimizer. The recipe determines the model and its outcomes up to random variation.`,
+    'model family': `Models that share central parts of their training recipe. For example, the Pythia models.`,
+    'proxy model': `A model that is smaller or cheaper to train than the target model, and that stands in for it in the experiments. For example, a 1B model instead of a 32B model, or a series of smaller models used to fit a scaling law.`,
+    'proxy treatment': `A stand-in for the treatment that the paper cares about that is cheaper to compute, observe or implement. For example, fine-tuning a model on private data instead of pretraining on it.`,
+    'proxy outcome': `A cheaper stand-in for the outcome the paper cares about. For example, the validation loss instead of performance on a downstream task, or a subset of a benchmark instead of the full benchmark.`,
+    'scaling law': `A parametric function of scale, fitted to the outcomes or treatment effects of several proxy models of increasing scale, and used to predict them at the target scale. For example, the validation loss as a function of model and dataset size.`,
+    'observational data': `Data from training runs that already existed, so the researchers did not control and do not know how the treatment was assigned. For example, the benchmark scores and architectures of publicly released models.`,
+    'theoretical control': `A control outcome that was not measured but computed from theory, by analytically approximating what the outcome would have been under the control. For example, influence functions, or canaries with a known distribution.`,
+    canary: `Data with known statistical properties injected into training, so that the control outcome follows from the distribution of the canaries. For example, Gaussian noise canaries, or canary sequences randomly assigned to the training or validation set in privacy auditing.`,
+    exchangeability: `Treatment and control groups do not differ systematically in anything other than the treatment. It holds by design in a controlled experiment and may fail in observational data through confounders or selection bias.`,
+    confounder: `A third factor that causes both the treatment and the outcome, so that the two are associated even without a causal effect. For example, calendar time, which confounds architecture and training data composition.`,
+    'selection bias': `A non-causal association between treatment and outcome induced by how observations enter the sample. For example, only the best-performing models are published.`,
+    positivity: `Every treatment value that the paper draws conclusions about occurs in the sample among otherwise comparable units. Effects of treatment values that no unit received can only be extrapolated, not estimated.`,
+    SUTVA: `Stable unit treatment value assumption, with two parts: no interference between units, and consistency between observed and potential outcomes.`,
+    interference: `A unit’s outcome depends on the treatments other units received, not only on its own treatment. For example, training on one document changes the loss of a near-duplicate document.`,
+    consistency: `All treated units received the same version of the treatment, so the observed outcome is the outcome of the treatment the paper names. For example, “document is in the training set” hides deduplication, number of epochs, and data ordering.`,
+    'potential outcome': `The outcome a unit would have under a given treatment, whether or not it actually received it. The causal effect is the difference between the potential outcomes under treatment and under control.`,
+    'identifying assumptions': `The assumptions under which the association between treatment and outcome is a causal effect. For example, exchangeability, positivity, and SUTVA, or parallel trends in a difference-in-differences design.`,
+    'difference-in-differences': `A design that compares the change over time in treated units to that in untreated units. It replaces exchangeability with the parallel trends assumption.`,
     'parallel trends': `Treated and untreated units would have developed alike without the treatment; the assumption behind difference-in-differences.`,
     'regression discontinuity': `Treatment is determined by a cutoff; potential outcomes are assumed to vary continuously across it, so units just above and below the cutoff are exchangeable in the limit.`,
-    operationalization: `The concrete implementation of a concept (for example, a paper might operationalize the concept “reasoning ability” by measuring a benchmark score).`,
-    'statistical validity': `Whether the estimate from a finite, noisy sample reliably reflects the true underlying quantity.`,
-    'internal validity': `Whether a reliable estimate reflects a genuine causal effect of the treatment, rather than some other difference between the compared groups or an influence of the units on each other.`,
-    'external validity': `Whether a genuine causal effect transfers from the setting in which it was measured to the target model or setting that the conclusions are about.`,
-    'construct validity': `Whether the treatment as implemented and the outcome as measured really capture the concepts named in the research question and conclusions.`
+    operationalization: `The concrete implementation of a concept. For example, a paper might operationalize the concept “reasoning ability” by measuring a benchmark score.`,
+    'statistical validity': `Whether the estimate from a finite, noisy sample reliably reflects the true underlying quantity. The threats are noise, a poorly fitted curve, and picking the best of many comparisons.`,
+    'internal validity': `Whether a reliable estimate reflects a genuine causal effect of the treatment, rather than some other difference between the compared groups or an influence of the units on each other. For example, when recent models with a new architecture achieve better outcomes, that does not mean that the architecture caused the improvements.`,
+    'external validity': `Whether a genuine causal effect transfers from the setting in which it was measured to the target model or setting that the conclusions are about. For example, whether an effect measured on a 1B model also holds for a 70B model.`,
+    'construct validity': `Whether the treatment as implemented and the outcome as measured really capture the concepts named in the research question and conclusions. For example, fine-tuning on private data instead of pretraining on it may threaten construct validity.`
   },
 
   // ---- Which words of the texts are glossary terms -------------------------
@@ -617,7 +634,6 @@ const CONTENT = {
     ['potential outcome', 'potential outcomes?'],
     ['scaling law', 'scaling laws?'],
     ['observational data', 'observational(?: data)?'],
-    ['influence functions', 'influence functions?'],
     ['canary', 'canar(?:y|ies)'],
     ['selection bias', 'selection bias'],
     ['confounder', 'confounders?|confounding|confounded'],

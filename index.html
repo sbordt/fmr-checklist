@@ -17,6 +17,7 @@
             }
   }
   * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
   html, body { height: 100%; }
   body { margin: 0; background: var(--bg); color: var(--fg);
          font: 17px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
@@ -24,7 +25,7 @@
   .top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: .9rem; color: var(--muted); }
   .top .brand { font-weight: 600; color: var(--fg); }
   .top .right { display: flex; gap: 14px; align-items: baseline; white-space: nowrap; }
-  .top button.link { background: none; border: 0; padding: 0; font-size: .9rem; color: var(--muted); text-decoration: underline; cursor: pointer; }
+  .top button.link, .top a.link { background: none; border: 0; padding: 0; font-size: .9rem; color: var(--muted); text-decoration: underline; cursor: pointer; }
   .screen button.link { background: none; border: 0; padding: 0; font: inherit; color: var(--accent); text-decoration: underline; cursor: pointer; }
   .bar { height: 4px; background: var(--line); border-radius: 2px; margin: 8px 0 24px; overflow: hidden; }
   .bar > div { height: 100%; background: var(--accent); width: 0; transition: width .25s; }
@@ -90,12 +91,14 @@
   .box .qa { margin: 4px 0 8px 1.2em; }
   .box .qq { color: var(--muted); font-size: .9rem; }
   .box .ans { white-space: pre-wrap; }
+  /* The glossary page. */
+  dl.glossary dt { font-weight: 700; margin-top: 14px; }
+  dl.glossary dd { margin: 2px 0 0; }
   .vc { font-weight: 700; white-space: nowrap; }
   .vc.Yes { color: var(--vc-yes); } .vc.Partly { color: var(--vc-partly); } .vc.No { color: var(--vc-no); } .vc.NA { color: var(--vc-na); }
   .vc.used { color: var(--vc-used); } .vc.unused { color: var(--vc-unused); } .vc.none { color: var(--muted); font-weight: 400; }
   .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
   .msg { color: var(--muted); font-size: .92rem; min-height: 1.4em; }
-  footer { margin-top: 16px; color: var(--muted); font-size: .85rem; }
   .term { text-decoration: underline dotted; text-decoration-color: var(--accent); text-underline-offset: 3px; cursor: help; }
   #tip { position: absolute; z-index: 10; background: var(--fg); color: var(--bg); padding: 8px 10px; border-radius: 8px;
          font-size: .9rem; line-height: 1.4; box-shadow: 0 4px 16px rgba(0,0,0,.25); pointer-events: none; }
@@ -105,7 +108,7 @@
 </head>
 <body>
 <div class="app">
-  <div class="top"><span class="brand">A Checklist for Foundation Model Research</span><span class="right"><span id="progress-label"></span><button type="button" class="link" id="reset-top" title="Clear all answers and start on page 1">Start over</button></span></div>
+  <div class="top"><span class="brand">A Checklist for Foundation Model Research</span><span class="right"><span id="progress-label"></span><a class="link" href="?glossary" target="_blank" rel="noopener" title="All terms of the checklist, in a new tab">Glossary</a><button type="button" class="link" id="reset-top" title="Clear all answers and start on page 1">Start over</button></span></div>
   <div class="bar"><div id="progress-bar"></div></div>
   <div class="screen" id="screen"></div>
   <div class="nav">
@@ -113,7 +116,6 @@
     <span class="msg" id="msg"></span>
     <button type="button" class="primary" id="next">Next</button>
   </div>
-  <footer id="foot" hidden><p>The questions, descriptions, and examples are taken from the checklist in the paper <em>A Framework and Checklist for Validity Threats in Foundation Model Research</em> (under review). Answers are stored only in your browser. Source: <a href="https://github.com/sbordt/fmr-checklist">github.com/sbordt/fmr-checklist</a>.</p></footer>
 </div>
 <div id="tip" role="tooltip" hidden></div>
 
@@ -136,7 +138,7 @@
   // Content: all texts come from content.js (CONTENT) and the filled example
   // from example.js (EXAMPLE). This file only renders them.
   // ------------------------------------------------------------------
-  const INTRO = CONTENT.intro, ABOUT = CONTENT.about, A1 = CONTENT.A1, QUESTIONS_A = CONTENT.questions, VALIDITY = CONTENT.validity,
+  const INTRO = CONTENT.intro, ABOUT = CONTENT.about, GLOSSARY_PAGE = CONTENT.glossaryPage, A1 = CONTENT.A1, QUESTIONS_A = CONTENT.questions, VALIDITY = CONTENT.validity,
         THREATS = CONTENT.threats, SV_PAGE = CONTENT.statistical, OTHER = CONTENT.other, SUMMARY = CONTENT.summary,
         GLOSSARY = CONTENT.glossary, TERM_PATTERNS = CONTENT.terms;
   const QUESTIONS = Object.keys(QUESTIONS_A); // the Yes/No questions on the strategies (A2 ... A8); A1 comes first, SV and OT last
@@ -153,7 +155,7 @@
         const groups = rest[rest.length - 1];
         const i = Object.keys(groups).findIndex((k) => groups[k] !== undefined);
         const key = TERM_PATTERNS[i][0];
-        if (seenTerms.has(key) || (exclude && exclude.includes(key))) return m;
+        if (!GLOSSARY[key] || seenTerms.has(key) || (exclude && exclude.includes(key))) return m; // no entry: no underline
         seenTerms.add(key);
         return '<span class="term" tabindex="0" data-term="' + key + '">' + m + '</span>';
       });
@@ -263,14 +265,22 @@
       '<p class="muted"><button type="button" class="link" id="load-example">' + esc(INTRO.exampleLink) + '</button> ' + esc(INTRO.exampleNote) + '</p>' +
       '<p class="muted"><button type="button" class="link" id="load-yes">' + esc(INTRO.allYesLink) + '</button> ' + esc(INTRO.allYesNote) + '</p>';
   }
+  // The glossary page (opened in its own tab with ?glossary): all terms in
+  // alphabetical order with their tooltip text, as plain text.
+  const cap = (k) => k.charAt(0).toUpperCase() + k.slice(1);
+  function screenGlossary() {
+    const keys = Object.keys(GLOSSARY).sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }));
+    return '<h2>' + esc(GLOSSARY_PAGE.title) + '</h2><dl class="glossary">' +
+      keys.map((k) => '<dt>' + esc(cap(k)) + '</dt><dd>' + esc(GLOSSARY[k]) + '</dd>').join('') + '</dl>';
+  }
   // The overview after Start: what this checklist is about.
   // Sections are headings of one level; the subsections of a section (the
   // research strategies) follow its paragraphs, one level below.
   function screenAbout() {
     const paras = (list) => (list || []).map((t) => '<p>' + T(t) + '</p>').join('');
     return '<p class="kicker">Overview</p><h2>' + esc(ABOUT.title) + '</h2><div class="about">' +
-      ABOUT.sections.map((sec) => '<h3>' + esc(sec.heading) + '</h3>' + paras(sec.paragraphs) +
-        (sec.subsections || []).map((sub) => '<h4>' + esc(sub.heading) + '</h4>' + paras(sub.paragraphs)).join('')).join('') + '</div>';
+      ABOUT.sections.map((sec) => '<h3>' + marks(esc(sec.heading)) + '</h3>' + paras(sec.paragraphs) +
+        (sec.subsections || []).map((sub) => '<h4>' + marks(esc(sub.heading)) + '</h4>' + paras(sub.paragraphs)).join('')).join('') + '</div>';
   }
   function screenA1() {
     return pageHead('A1', A1.title) +
@@ -402,7 +412,6 @@
     $('#progress-bar').style.width = Math.round(100 * i / (list.length - 1)) + '%';
     $('#back').disabled = (i === 0);
     $('#next').textContent = step.id === 'intro' ? 'Start' : step.id === 'summary' ? 'Review from the start' : (i === list.length - 2 ? 'Summary' : 'Next');
-    $('#foot').hidden = !(step.id === 'intro' || step.id === 'about' || step.id === 'summary');
     if (!(opts && opts.keepScroll)) window.scrollTo(0, 0);
     save();
   }
@@ -489,6 +498,15 @@
   document.addEventListener('focusout', (ev) => { const t = ev.target.closest && ev.target.closest('.term'); if (t) hideTip(); });
   document.addEventListener('click', (ev) => { const t = ev.target.closest && ev.target.closest('.term'); if (t) { if (tip.hidden) showTip(t); else hideTip(); } else if (!tip.hidden) hideTip(); });
 
+  // ?glossary: the glossary alone, in its own tab; it does not touch the saved answers.
+  if (/[?&]glossary\b/.test(window.location.search)) {
+    document.title = GLOSSARY_PAGE.title + ' · ' + document.title;
+    $('#screen').innerHTML = screenGlossary();
+    $('.nav').hidden = true;
+    $('.top .right').hidden = true;
+    $('.bar').hidden = true;
+    return;
+  }
   const wantExample = /[?&]example\b/.test(window.location.search);
   const wantYes = /[?&]yes\b/.test(window.location.search);
   if (wantExample || wantYes || /[?&]reset\b/.test(window.location.search)) {
