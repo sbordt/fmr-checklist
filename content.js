@@ -25,9 +25,10 @@ const CONTENT = {
     title: `A Checklist for Foundation Model Research`,
     lead: `Foundation model research relies on strategies that approximate the ideal experiment. This introduces hidden assumptions that that pose threats to the validity of research findings. This checklists walks the user through some of the most common approximation strategies and helps to identify the relevant validity threats.`,
     bullets: [
-      `The checklist asks the user how a research strategy is being employed, and how the relevant validity threats are being addressed.`,
-      `The checklist also contains some of general questions about statistical methodology.`,
-      `The goal of the checklist is to help both authors and reviewers to identify relevant threats to the validity of a given paper or experiment.`,
+      `The checklist consists of 10 high-level question with individual follow-ups.`,
+      `Every question asks the user if a research strategy is being employed and how.`,
+      `The final question is a general question about statistical methodology.`,
+      `The goal of the checklist is to help authors and reviewers identify threats to the validity of a given paper or research finding.`,
       `Disclaimer: Completing the checklist does not guarantee that a research result is valid.`
     ],
     exampleLink: `Load a filled example`,
@@ -69,22 +70,22 @@ const CONTENT = {
     A3: {
       question: `Do the experiments involve proxy treatments?`,
       ifYes: `Which experiments are performed with proxy treatments?`,
-      description: `A proxy treatment replaces the expensive treatment that the paper cares about with a stand-in that is cheaper to compute, observe or implement.`,
-      example: `A model is fine-tuned on private data instead of pretrained on it, or per-domain loss is used as a stand-in for unobserved data-mixture weights.`,
+      description: `A proxy treatment replaces the treatment that the paper cares about with a stand-in that is cheaper to compute, observe or implement.`,
+      example: `Training data ablation experiments often use fine-tuning or continual pretraining instead of training a model from scratch.`,
       defines: ['proxy treatment']
     },
     A4: {
       question: `Do the experiments involve proxy outcomes?`,
       ifYes: `Which proxy outcomes does the paper measure?`,
-      description: `A proxy outcome replaces the outcome the paper cares about with a cheaper stand-in.`,
-      example: `The training loss stands in for performance on a task that we care about, or a small subset of benchmark questions stand in for the full benchmark.`,
+      description: `A proxy outcome replaces the outcome the paper cares about with a stand-in that is cheaper to compute, observe or implement.`,
+      example: `The cross-validation loss stands in for performance on a task that we care about. A small subset of benchmark questions stand in for the full benchmark.`,
       defines: ['proxy outcome']
     },
     A5: {
       question: `Do the experiments involve observational data?`,
       ifYes: `Which experiments involve observational data?`,
-      description: `Data is experimental if the researchers decided which units receive the treatment (they ran the training runs, ablations, or sweeps themselves). It is observational if the runs already existed and someone else made those decisions, so the researchers did not control and do not know how the treatment was assigned.`,
-      example: `Relating recipe choices to benchmark scores across publicly released models; analyzing released checkpoints of an existing model suite; using leaderboards or model cards.`,
+      description: `Data is experimental if the researchers decided which units receive the treatment, meaning they performed the training runs, ablationns or hyperparameter sweeps themselves. In contrast, data is observational if the training runs already existed, meaning that the researchers did not control and do not know how the treatment was assigned.`,
+      example: `Researchers collect the architecture choices and benchmark scores of all publicly released models, use leaderboards or model cards.`,
       defines: ['observational data']
     },
     A6: {
@@ -163,8 +164,8 @@ const CONTENT = {
       label: `A2-EV2`,
       items: [
         {
-          text: `If the target setting involves models with different training recipes, then the paper needs to argue why the measured effect holds for the target training recipes as well. In general, any measured effect can critically depend on factors that were held fixed in the experiments. If such a factor is changed, then the size, or even the sign, of the effect can change as well.`,
-          example: `The conclusions from a data-selection experiment can flip when the architecture or hyperparameters are changed.`
+          text: `If the target setting involves models trained with a different training recipe, then the paper needs to argue why the measured effect holds for the target training recipe as well. In general, any measured effect can critically depend on factors that were held fixed in the experiments. If such a factor is changed, then the size, or even the sign, of the effect can change as well.`,
+          example: `The conclusions from a data-selection experiment can flip when the architecture or other hyperparameters are changed.`
         }
       ]
     },
@@ -174,7 +175,7 @@ const CONTENT = {
       type: `SV`,
       name: `Functional form`,
       gate: `Does the paper fit a functional form (for example, linear regression or a power-law)?`,
-      box: `How does the paper justify or test the assumed form, and report the quality of the fit?`,
+      box: `How does the paper justify or test the assumed form, and does it report the quality of the fit?`,
       items: [
         {
           text: `If the paper fits a functional form (for example, linear regression or a power-law), then the paper needs to justify or test the assumed form, and report the quality of the fit.`,
@@ -186,12 +187,12 @@ const CONTENT = {
       id: `A3-CV1`,
       page: `A3`,
       type: `CV`,
-      name: `Construct validity of the treatment`,
+      name: `Construct validity of the proxy treatment`,
       label: `A3-CV1`,
       items: [
         {
-          text: `If the experiments involve proxy treatments, then the paper needs to argue that the proxy acts on the outcome in the same way. In general, two treatments that look alike can act on the outcome in different ways, so the measured effect may be a different effect than the one claimed.`,
-          example: `Multi-epoch fine-tuning memorizes far more than single-epoch pre-training, so it overestimates privacy leakage.`
+          text: `If the experiments involve proxy treatments, then the paper needs to argue that the proxy acts on the outcome in the same way that the original treatment would. In general, two treatments that look alike can act on the outcome in different ways, so the effect measured under the proxy may be different from the one that would be measured under the original treatment.`,
+          example: `Multi-epoch fine-tuning memorizes far more than single-epoch pre-training. Therefore, multi-epoch fine-tuning is not a good proxy to measure privacy leakage during pretraining.`
         }
       ]
     },
@@ -203,8 +204,8 @@ const CONTENT = {
       label: `A4-CV1`,
       items: [
         {
-          text: `If the experiments involve proxy outcomes, then the paper needs to argue that the proxy reacts to the treatment in the same way. In general, the treatment may affect the measured outcome but not the outcome of interest, or vice versa.`,
-          example: `An improvement in validation loss is not always guaranteed to improve downstream performance.`
+          text: `If the experiments involve proxy outcomes, then the paper needs to argue that the proxy reacts to the treatment in the same way that the original outcome would. In general, the treatment may affect the measured outcome but not the outcome of interest, or vice versa.`,
+          example: `An improvement in the cross-validation loss after pretraining is not always guaranteed to improve performance after post-training. Therefore, the cross-validation loss after pretraining is an imperfect proxy for post-training performance.`
         }
       ]
     },
@@ -218,7 +219,7 @@ const CONTENT = {
       items: [
         {
           text: `If the experiments involve observational data, then the paper needs to establish that treatment and control groups do not differ systematically in anything other than the treatment. This may fail due to confounders (third factors that influence both which units get the treatment and their outcome) or selection bias (units enter the sample in a way that depends on treatment and outcome, e.g., only the best-performing models are published). The paper may adjust for measured confounders, which requires that groups are comparable once those confounders are held fixed.`,
-          example: `Architecture and training data composition are confounded by calendar time; a correlation between architecture and benchmark score may actually be caused by data composition.`
+          example: `Architecture and training data composition are confounded by calendar time. Therefore, an observed correlation between architecture and benchmark score may actually be caused by data composition.`
         }
       ]
     },
