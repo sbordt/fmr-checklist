@@ -1,4 +1,4 @@
-# Validity Checklist for Foundation Model Research
+# A Checklist for Foundation Model Research
 
 Here we present the full checklist for authors and reviewers.
 

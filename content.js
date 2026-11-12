@@ -7,6 +7,8 @@
 //     need no escaping. A backtick inside a text is the only thing that breaks
 //     the file. Line breaks inside a text are allowed.
 //   * Texts are plain text; only the intro bullets allow HTML (<em>).
+//     Words between double brackets, [[like this]], are shown in pink: new
+//     wording that still has to be reviewed. Remove the brackets to accept it.
 //   * Keep the keys (question:, example:, ...) as they are; the page looks
 //     them up by name.
 //   * Terms of the glossary (at the end) are underlined where they are used
@@ -32,7 +34,58 @@ const CONTENT = {
       `Disclaimer: Completing the checklist does not guarantee that a research result is valid.`
     ],
     exampleLink: `Load a filled example`,
-    exampleNote: `(the case study of Ruan et al., 2024, from the paper). This replaces your answers.`
+    exampleNote: `(the case study of Ruan et al., 2024, from the paper). This replaces your answers.`,
+    allYesLink: `For debugging: answer every question with Yes`,
+    allYesNote: `and click through the pages to inspect all texts.`
+  },
+
+  // ---- The overview page after Start: what this checklist is about ---------
+  // Sentences from the paper (introduction, Section 2, the opening paragraphs
+  // of Sections 3-5 and Appendix F), with a few connecting words. Each
+  // section has a heading and paragraphs; add or remove sections freely.
+  about: {
+    title: `What this checklist is about`,
+    sections: [
+      {
+        heading: `The ideal experiment`,
+        paragraphs: [
+          `Most research questions about foundation models are interventional: they ask what would happen to model behavior if some aspect of the training recipe (the data, the architecture, the optimizer) were changed. A foundation model is trained according to a particular training recipe, which encompasses all controllable parts of model training. Up to some uncontrollable random variation, the training recipe determines the foundation model along with a range of outcome measures (including upstream outcomes like the training loss, and downstream outcomes such as benchmark scores). A research question then asks about the effect of a treatment on the outcomes for a particular recipe: Would decreasing the learning rate improve downstream performance? Would adding a data source during mid-training improve reasoning behavior?`,
+          `The ideal way to answer such research questions would be a controlled experiment requiring several full training runs. At target scale, meaning for frontier models, such a controlled experiment is, however, computationally infeasible. To work around this constraint, the community has developed various approximation strategies that study model behavior on a compute budget. What these strategies have in common is that they estimate the relevant treatment effect without performing the ideal experiment. Estimating treatment effects in this way is, however, generally only possible under assumptions.`
+        ]
+      },
+      {
+        heading: `Proxy models and scaling laws`,
+        paragraphs: [
+          `In the proxy approach, a controlled experiment is performed, however some part of the experiment, the model, the treatment, or the outcome, is replaced with a proxy to make it computationally feasible. Proxy models replace the target recipe with a proxy recipe that is cheaper to train. The proxy recipe can have fewer parameters, fewer training tokens, or both. In its simplest form, the proxy approach assumes that the treatment effect does not depend on the considered scale. The more interesting scenario, however, is when the treatment effect depends on the scale in a way that is predictable. In this case, treatment effects and outcomes can be estimated with scaling laws.`
+        ]
+      },
+      {
+        heading: `Proxy treatments and outcomes`,
+        paragraphs: [
+          `Instead of replacing the model with a proxy, we can replace the treatment or outcome. One example of a proxy treatment is to fine-tune a model instead of re-training it from scratch. One example of a proxy outcome is to use a subset of a benchmark to estimate the full benchmark score, or the validation loss instead of task performance.`
+        ]
+      },
+      {
+        heading: `Observational data`,
+        paragraphs: [
+          `The observational approach avoids training new models altogether and instead analyzes the meta-data of existing training runs. In recent works, the observational approach has been employed to derive scaling laws, to improve the pretraining data mix, and to predict benchmark performance from fewer samples.`
+        ]
+      },
+      {
+        heading: `Single-run designs`,
+        paragraphs: [
+          `Single-run approaches approximate the treatment effect with a single training run, by emulating several treatment and control runs from it. The within-run approach regards the training run as containing a set of independently treatable units with separate outcomes, thereby allowing us to form treatment and control populations within a single run. For example, to estimate the average effect of training on a document on the document’s loss, the within-run approach regards each document as a separate unit that can be independently assigned to the treatment group (the training data) or the control group (the validation data).`,
+          `A second approach, the theoretical control approach, derives the control outcomes analytically instead. One instance of this are influence functions, which are used to approximate the contribution of individual training examples to a particular prediction. Another is to inject signals into the training run that can be used to derive a mathematically guaranteed control: in privacy auditing, for example, “canary” data is randomly assigned to the training or validation set.`
+        ]
+      },
+      {
+        heading: `Validity threats`,
+        paragraphs: [
+          `Violations of necessary assumptions in the estimation of treatment effects pose threats to the validity of research results. For example, if the results from smaller proxy experiments do not generalize across scale, then it is invalid to conclude from small-scale experiments about large-scale behavior. For this reason, it is important that the assumptions that underlie different research strategies are explicitly discussed. The checklist distinguishes four types of validity: statistical validity asks whether an estimate from a finite, noisy sample reliably reflects the true effect; internal validity, whether a reliable estimate reflects a genuine causal effect; external validity, whether a genuine causal effect transfers to the recipe that we care about; and construct validity, whether the operationalization of treatment and outcome actually reflects the constructs in the research question.`,
+          `This checklist first asks about the research question and identifies the approximation strategies of the central experiment. It then asks whether the given work properly discusses the validity threats that come with the chosen research strategies.`
+        ]
+      }
+    ]
   },
 
   // ---- Page 1: the research question (A1 of the paper) --------------------
@@ -57,7 +110,8 @@ const CONTENT = {
 
   // ---- Pages 2 to 8: the approximation strategies (A2 to A8) --------------
   // question: the Yes/No question; ifYes: the label of the box after a Yes;
-  // description and example: shown above the Yes/No; note: an extra line.
+  // description and example: shown above the Yes/No; note: an optional line
+  // shown after a Yes, under the ifYes box and above the follow-up boxes.
   // The order of the keys is the order of the pages.
   questions: {
     A2: {
@@ -106,7 +160,7 @@ const CONTENT = {
       ifYes: `Which other approximations are performed?`,
       description: `List any way in which the design deviates from the ideal experiment that is not covered by the previous questions.`,
       example: `Measuring the outcome only at coarse checkpoint intervals; analyzing a subsample of the units; having access to a dataset that is iid. but not included in the training data.`,
-      note: `If the answer is [Yes], address any validity types that the approximations threaten. If you are unsure about the validity types, you can use the field at the end of the checklist (other threats).`
+      note: `Address any validity types that the approximations threaten. If you are unsure about the validity types, you can use the field at the end of the checklist (other threats).`
     }
   },
 
@@ -137,8 +191,13 @@ const CONTENT = {
   // type: SV, IV, EV, or CV. name: the title of the card.
   // label: the label of the bullet point in the paper (not shown).
   // items: the bullet point(s) of the paper, each with its example.
+  // question: on page 9, a short question shown as the heading; the texts
+  //       are then the explanation below it (without it, the first text is
+  //       the heading).
   // gate: a Yes/No question for a threat that may or may not occur; the
-  //       answer box appears only after a Yes.
+  //       answer box appears only after a Yes. gate: true asks Yes/No right
+  //       after the texts, without a question of its own. boxOn: 'No' opens
+  //       the box after a No instead.
   // The question above the answer box is "How does the paper address <name>?"
   // unless ask (replaces <name>) or box (replaces the whole question) is given.
   // The order of the entries is the order of the cards on a page.
@@ -151,7 +210,7 @@ const CONTENT = {
       label: `A2-EV1`,
       items: [
         {
-          text: `If the experiments involve proxy models, then the paper needs to justify why the conclusions also hold for the target model. In general, effects measured on proxy models can change in size, or even in sign, as the model size or the amount of training data is being increased.`,
+          text: `The paper needs to justify why the conclusions also hold for the target model. In general, effects measured on proxy models can change in size, or even in sign, as the model size or the amount of training data is being increased.`,
           example: `The optimal learning rate often depends on the model size, a naive extrapolation from 1B to 70B could be wrong.`
         }
       ]
@@ -174,11 +233,11 @@ const CONTENT = {
       page: `A2`,
       type: `SV`,
       name: `Functional form`,
-      gate: `Does the paper fit a functional form (for example, linear regression or a power-law)?`,
+      gate: true,
       box: `How does the paper justify or test the assumed form, and does it report the quality of the fit?`,
       items: [
         {
-          text: `If the paper fits a functional form (for example, linear regression or a power-law), then the paper needs to justify or test the assumed form, and report the quality of the fit.`,
+          text: `Does the paper fit a functional form (for example, linear regression or a power-law)?`,
           example: `Scaling laws often use a power-law relationship, and this functional form has been validated in multiple papers.`
         }
       ]
@@ -191,7 +250,7 @@ const CONTENT = {
       label: `A3-CV1`,
       items: [
         {
-          text: `If the experiments involve proxy treatments, then the paper needs to argue that the proxy acts on the outcome in the same way that the original treatment would. In general, two treatments that look alike can act on the outcome in different ways, so the effect measured under the proxy may be different from the one that would be measured under the original treatment.`,
+          text: `The paper needs to argue that the proxy acts on the outcome in the same way that the original treatment would. In general, two treatments that look alike can act on the outcome in different ways, so the effect measured under the proxy may be different from the one that would be measured under the original treatment.`,
           example: `Multi-epoch fine-tuning memorizes far more than single-epoch pre-training. Therefore, multi-epoch fine-tuning is not a good proxy to measure privacy leakage during pretraining.`
         }
       ]
@@ -204,7 +263,7 @@ const CONTENT = {
       label: `A4-CV1`,
       items: [
         {
-          text: `If the experiments involve proxy outcomes, then the paper needs to argue that the proxy reacts to the treatment in the same way that the original outcome would. In general, the treatment may affect the measured outcome but not the outcome of interest, or vice versa.`,
+          text: `The paper needs to argue that the proxy reacts to the treatment in the same way that the original outcome would. In general, the treatment may affect the measured outcome but not the outcome of interest, or vice versa.`,
           example: `An improvement in the cross-validation loss after pretraining is not always guaranteed to improve performance after post-training. Therefore, the cross-validation loss after pretraining is an imperfect proxy for post-training performance.`
         }
       ]
@@ -215,10 +274,10 @@ const CONTENT = {
       type: `IV`,
       name: `Exchangeability`,
       label: `A5-IV1`,
-      defines: ['exchangeability', 'confounder', 'selection bias'],
+      defines: ['exchangeability'],
       items: [
         {
-          text: `If the experiments involve observational data, then the paper needs to establish that treatment and control groups do not differ systematically in anything other than the treatment. This may fail due to confounders (third factors that influence both which units get the treatment and their outcome) or selection bias (units enter the sample in a way that depends on treatment and outcome, e.g., only the best-performing models are published). The paper may adjust for measured confounders, which requires that groups are comparable once those confounders are held fixed.`,
+          text: `The paper needs to establish that treatment and control groups do not differ systematically in anything other than the treatment. This may fail due to confounders or selection bias. The paper may adjust for measured confounders, which requires that groups are comparable once those confounders are held fixed.`,
           example: `Architecture and training data composition are confounded by calendar time. Therefore, an observed correlation between architecture and benchmark score may actually be caused by data composition.`
         }
       ]
@@ -232,7 +291,7 @@ const CONTENT = {
       defines: ['positivity'],
       items: [
         {
-          text: `If the experiments involve observational data, then the paper needs to establish that every treatment value the paper draws conclusions about occurs in the sample among otherwise comparable units. When other variables are adjusted for, this has to be the case within every combination of those variables. Effects of treatment values that no unit received can only be extrapolated, not estimated.`,
+          text: `The paper needs to establish that every treatment value the paper draws conclusions about occurs in the sample among otherwise comparable units. When other variables are adjusted for, this has to be the case within every combination of those variables. Effects of treatment values that no unit received can only be extrapolated, not estimated.`,
           example: `If a document is not included in any training run in the sample, we cannot estimate its effect.`
         }
       ]
@@ -246,11 +305,11 @@ const CONTENT = {
       defines: ['SUTVA', 'interference', 'consistency'],
       items: [
         {
-          text: `If the experiments involve observational data, then the paper needs to establish that each unit’s outcome depends only on its own treatment, not on the treatments other units received.`,
+          text: `The paper needs to establish that each unit’s outcome depends only on its own treatment, not on the treatments other units received.`,
           example: `This might not be the case when units share training data or evaluation pools across runs.`
         },
         {
-          text: `If the experiments involve observational data, then the paper needs to establish that all treated units received the same version of the treatment.`,
+          text: `In addition, the paper needs to establish that all treated units received the same version of the treatment.`,
           example: `“Document is in the training set” hides deduplication, number of epochs, and data ordering.`
         }
       ]
@@ -263,7 +322,7 @@ const CONTENT = {
       label: `A5-EV1`,
       items: [
         {
-          text: `If the experiments involve observational data and pool across many model families, then the measured effect is an average over the pooled recipes, and the effect for the target training recipe could be different.`,
+          text: `If the experiments pool across many model families, then the measured effect is an average over the pooled recipes, and the effect for the target training recipe could be different.`,
           example: `Scaling law coefficients change with the pretraining data composition.`
         }
       ]
@@ -277,7 +336,7 @@ const CONTENT = {
       box: `How does the paper establish that the sample size is large enough, and account for noise in the estimate?`,
       items: [
         {
-          text: `If the experiments involve observational data from public training runs, then the paper needs to establish that the sample size is large enough, and account for noise in the estimate.`,
+          text: `The paper needs to establish that the sample size is large enough, and account for noise in the estimate.`,
           example: `The number of frontier training runs is small.`
         }
       ]
@@ -292,7 +351,7 @@ const CONTENT = {
       box: `How does the paper address the construct validity of the proxies?`,
       items: [
         {
-          text: `If the experiments involve observational data, then they might implicitly involve proxy outcomes or proxy treatments, because the treatment and outcome of interest are often not documented. If this is the case, then the construct validity of the proxies needs to be addressed.`
+          text: `Experiments with observational data might implicitly involve proxy outcomes or proxy treatments, because the treatment and outcome of interest are often not documented. If this is the case, then the construct validity of the proxies needs to be addressed.`
         }
       ]
     },
@@ -305,7 +364,7 @@ const CONTENT = {
       defines: ['exchangeability', 'parallel trends'],
       items: [
         {
-          text: `If the experiments treat elements of a single training run as independent units, then the paper needs to establish that the treated and the control units do not differ systematically.`,
+          text: `The paper needs to establish that the treated and the control units do not differ systematically.`,
           example: `The within-run estimate overestimates memorization when the treated units are sampled randomly, and the untreated units reflect near training duplicates, a particular domain (code), or especially hard examples.`
         },
         {
@@ -324,7 +383,7 @@ const CONTENT = {
       defines: ['interference'],
       items: [
         {
-          text: `If the experiments use theoretical controls or treat elements of a single training run as independent units, then the paper needs to establish that each unit’s outcome depends only on its own treatment, not on the treatments other units received. In particular, the paper needs to establish that the outcome of control units is not affected by the presence of the treatments.`,
+          text: `The paper needs to establish that each unit’s outcome depends only on its own treatment, not on the treatments other units received. In particular, the paper needs to establish that the outcome of control units is not affected by the presence of the treatments.`,
           example: `When we add additional documents to the training data, this can change the final loss of documents that were previously in the training data.`
         }
       ]
@@ -352,7 +411,7 @@ const CONTENT = {
       defines: ['interference'],
       items: [
         {
-          text: `If the experiments use theoretical controls or treat elements of a single training run as independent units, then the paper needs to establish that each unit’s outcome depends only on its own treatment, not on the treatments other units received. In particular, the paper needs to establish that the outcome of control units is not affected by the presence of the treatments.`,
+          text: `The paper needs to establish that each unit’s outcome depends only on its own treatment, not on the treatments other units received. In particular, the paper needs to establish that the outcome of control units is not affected by the presence of the treatments.`,
           example: `Training on canary i may affect the outcome for canary j.`
         }
       ]
@@ -366,7 +425,7 @@ const CONTENT = {
       box: `How does the paper discuss the statistical assumptions of the approximation?`,
       items: [
         {
-          text: `If the paper performs approximations that rely on strong statistical assumptions, then the paper needs to discuss these assumptions. This is especially relevant if the experiments use theoretical controls.`,
+          text: `Theoretical controls are approximations that often rely on strong statistical assumptions. The paper needs to discuss these assumptions.`,
           example: `Influence functions accurately capture the leave-one-out retraining effect for simple models like linear or logistic regression, but the same might not be true for transformers.`
         }
       ]
@@ -394,7 +453,7 @@ const CONTENT = {
       box: `How does the paper address the construct validity of the proxy?`,
       items: [
         {
-          text: `If the experiments use theoretical controls, then the approximation might implicitly involve proxy treatments. If this is the case, then the construct validity of the proxy needs to be addressed.`,
+          text: `The approximation might implicitly involve proxy treatments. If this is the case, then the construct validity of the proxy needs to be addressed.`,
           example: `Influence functions replace the effect of “removing one data point” with “reducing the weight of one data point”.`
         }
       ]
@@ -403,13 +462,14 @@ const CONTENT = {
       id: `SV-noise`,
       page: `SV`,
       type: `SV`,
-      name: `Noise`,
+      name: `Random Noise and Error Bars`,
+      gate: true,
+      boxOn: `No`,
+      box: `Which source of randomness is not addressed in the paper?`,
       items: [
         {
-          text: `The paper needs to report error bars and say which source of randomness they capture.`
-        },
-        {
-          text: `The critical question is what would come out if all models were re-trained with different random seeds. The difference between two training recipes can be smaller than the seed-to-seed variation within one training recipe.`
+          text: `Does the paper report error bars and say which source of randomness they capture?`,
+          example: `The difference between two training recipes can be smaller than the seed-to-seed variation within one training recipe.`
         }
       ]
     },
@@ -417,9 +477,10 @@ const CONTENT = {
       id: `SV-best`,
       page: `SV`,
       type: `SV`,
-      name: `Best of many comparisons`,
-      gate: `Does the paper report the best of many noisy comparisons (arms, benchmarks, checkpoints)?`,
-      ask: `picking the best of many comparisons`,
+      name: `Best of Many Comparisons`,
+      question: `Does the paper report the best of many comparisons?`,
+      gate: true,
+      box: `How does the paper address picking the best of many comparisons?`,
       items: [
         {
           text: `If the paper reports the best of many noisy comparisons (arms, benchmarks, checkpoints), then the result may look strong by chance.`,
@@ -431,8 +492,10 @@ const CONTENT = {
       id: `SV-units`,
       page: `SV`,
       type: `SV`,
-      name: `Units that are not independent`,
-      gate: `Does the paper rely on multiple units that are not independent?`,
+      name: `Dependent Units`,
+      question: `Does the paper rely on units that are not independent?`,
+      gate: true,
+      box: `How does the paper account for the dependence between the units?`,
       items: [
         {
           text: `If the paper relies on multiple units that are not independent, then the estimate is less precise than what the raw sample count suggests.`,
@@ -445,9 +508,10 @@ const CONTENT = {
   // ---- Page 9: statistical validity ---------------------------------------
   // The question of SV is validity.SV.question above; the cards are the
   // threats with page: 'SV'.
+  // note: an optional line under the question (empty: nothing is shown).
   statistical: {
     title: `Statistical validity`,
-    note: `All papers have to address this question.`
+    note: ``
   },
 
   // ---- Page 10: other threats (OT) ----------------------------------------
@@ -457,7 +521,7 @@ const CONTENT = {
     ifYes: `Which other assumptions are required, and does the paper discuss these assumptions?`,
     guidelines: [
       `Here you can list any assumption or threat to the validity of the paper’s conclusions.`,
-      `Use this field if the paper uses a novel approximation strategy and you are unsure about the validity types.`
+      `Use this question if the paper uses a novel approximation strategy and you are unsure about the validity types.`
     ]
   },
 
@@ -501,8 +565,8 @@ const CONTENT = {
     canary: `Data with known statistical properties injected into training; the control outcome then follows from the distribution of the canaries.`,
     'influence functions': `Analytical approximations of the contribution of individual training examples to a prediction; they replace the effect of removing one data point with the effect of reducing its weight.`,
     exchangeability: `Treatment and control groups do not differ systematically in anything other than the treatment.`,
-    confounder: `A third factor that influences both which units get the treatment and their outcome.`,
-    'selection bias': `Units enter the sample in a way that depends on treatment and outcome, e.g., only the best-performing models are published.`,
+    confounder: `A third factor that causes both the treatment and the outcome, thereby inducing an association between them even if the treatment has no causal effect. A prominent confounder in observational data is calendar time.`,
+    'selection bias': `A non-causal dependence between treatment and outcome induced by the process by which observations enter the sample, e.g., the decision to publish a model: only the best-performing models are published.`,
     positivity: `Every treatment value the paper draws conclusions about occurs in the sample among otherwise comparable units.`,
     SUTVA: `Stable unit treatment value assumption: no interference between units, and consistency between observed and potential outcomes.`,
     interference: `A unit’s outcome depends on the treatments other units received, not only on its own treatment.`,

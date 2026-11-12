@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Validity Checklist for Foundation Model Research</title>
+<title>A Checklist for Foundation Model Research</title>
 <meta name="description" content="A checklist for authors and reviewers of foundation model research: which approximation strategies does the experiment use, and does the paper discuss the validity threats that come with them?">
 <style>
   :root {
@@ -47,12 +47,14 @@
   .answer label:has(input:checked) { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
   .answer input { margin: 0; }
   .threat .answer label { background: var(--bg); }
-  textarea { width: 100%; font: inherit; color: inherit; background: var(--bg);
-                               border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+  textarea { width: 100%; font: inherit; color: inherit; background: var(--bg); resize: vertical;
+             border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
   label.field { display: block; margin: 12px 0; }
   label.field > span { display: block; font-size: .92rem; color: var(--muted); margin-bottom: 4px; }
   .note { border-left: 3px solid var(--line); padding-left: 12px; color: var(--muted); font-size: .95rem; margin: 12px 0; }
   .sub { margin-top: 22px; padding-top: 12px; border-top: 1px solid var(--line); }
+  /* Page 9: the cards carry the question as their title. */
+  .threat h3.q { font-size: 1.1rem; line-height: 1.35; }
   .threat { background: var(--soft); border-radius: 10px; padding: 12px 14px; margin: 10px 0; }
   .threat h3 { margin: 0 0 6px; }
   /* Sticks to the bottom of the window, so that Back and Next are reachable without scrolling. */
@@ -99,7 +101,7 @@
 </head>
 <body>
 <div class="app">
-  <div class="top"><span class="brand">Validity Checklist for Foundation Model Research</span><span class="right"><span id="progress-label"></span><button type="button" class="link" id="reset-top" title="Clear all answers and start on page 1">Start over</button></span></div>
+  <div class="top"><span class="brand">A Checklist for Foundation Model Research</span><span class="right"><span id="progress-label"></span><button type="button" class="link" id="reset-top" title="Clear all answers and start on page 1">Start over</button></span></div>
   <div class="bar"><div id="progress-bar"></div></div>
   <div class="screen" id="screen"></div>
   <div class="nav">
@@ -130,7 +132,7 @@
   // Content: all texts come from content.js (CONTENT) and the filled example
   // from example.js (EXAMPLE). This file only renders them.
   // ------------------------------------------------------------------
-  const INTRO = CONTENT.intro, A1 = CONTENT.A1, QUESTIONS_A = CONTENT.questions, VALIDITY = CONTENT.validity,
+  const INTRO = CONTENT.intro, ABOUT = CONTENT.about, A1 = CONTENT.A1, QUESTIONS_A = CONTENT.questions, VALIDITY = CONTENT.validity,
         THREATS = CONTENT.threats, SV_PAGE = CONTENT.statistical, OTHER = CONTENT.other, SUMMARY = CONTENT.summary,
         GLOSSARY = CONTENT.glossary, TERM_PATTERNS = CONTENT.terms;
   const QUESTIONS = Object.keys(QUESTIONS_A); // the Yes/No questions on the strategies (A2 ... A8); A1 comes first, SV and OT last
@@ -153,7 +155,10 @@
       });
     }).join('');
   }
-  const T = (text, exclude) => wrapTerms(esc(text), exclude);
+  // [[words]] in a text are new wording to review, shown in pink.
+  const marks = (html) => html.replace(/\[\[(.+?)\]\]/g, '<span class="new">$1</span>');
+  const plain = (text) => String(text).replace(/\[\[(.+?)\]\]/g, '$1');
+  const T = (text, exclude) => wrapTerms(marks(esc(text)), exclude);
   // Terms that the current screen defines itself get no tooltip there.
   const defined = (keys) => (keys || []).forEach((k) => seenTerms.add(k));
   const lc = (name) => (/^[A-Z]{2,}/.test(name) ? name : name.charAt(0).toLowerCase() + name.slice(1));
@@ -175,8 +180,9 @@
   // threats, and the summary.
   // ------------------------------------------------------------------
   const ORDER = ['A1'].concat(QUESTIONS, ['SV', 'OT']);
+  // The first page, the overview, the ten pages of the checklist, the summary.
   function steps() {
-    return [{ id: 'intro' }].concat(ORDER.map((id) => ({ id: id })), [{ id: 'summary' }]);
+    return [{ id: 'intro' }, { id: 'about' }].concat(ORDER.map((id) => ({ id: id })), [{ id: 'summary' }]);
   }
   function currentIndex(list) {
     let i = list.findIndex((s) => s.id === state.step);
@@ -185,8 +191,10 @@
   }
   // The threats a Yes to one question raises, in the order of the paper's table.
   function threatsFor(a) { return THREATS.filter((t) => t.page === a); }
-  // Whether the box of a threat is open (no gate, or the gate answered with Yes).
-  function isOpen(t) { return !t.gate || val('gate:' + t.id) === 'Yes'; }
+  // Whether the box of a threat is open: no gate, or the gate answered with the
+  // answer that opens the box (Yes, or No for items with boxOn: 'No').
+  const opensOn = (t) => t.boxOn || 'Yes';
+  function isOpen(t) { return !t.gate || val('gate:' + t.id) === opensOn(t); }
 
   // ------------------------------------------------------------------
   // Screens
@@ -210,15 +218,27 @@
     defined(t.defines);
     let html = '<div class="threat"><h3>' + n + '. ' + esc(t.name) + '</h3>';
     t.items.forEach((it) => { html += '<p>' + T(it.text) + '</p>' + (it.example ? example(it.example) : ''); });
-    if (t.gate) html += '<p>' + T(t.gate) + '</p>' + radios('gate:' + t.id, ['Yes', 'No']);
+    if (t.gate) html += (t.gate === true ? '' : '<p>' + T(t.gate) + '</p>') + radios('gate:' + t.id, ['Yes', 'No']);
+    if (isOpen(t)) html += textarea('note:' + t.id, boxFor(t), 2);
+    return html + '</div>';
+  }
+  // Page 9: cards like on the pages before, but with the Yes/No question as
+  // the title (the item's question, or else its first text), the explanation
+  // and example below, Yes/No, and the box after the answer that opens it.
+  function questionBlock(t, n) {
+    defined(t.defines);
+    const first = t.items[0], rest = t.items.slice(1);
+    let html = '<div class="threat"><h3 class="q">' + n + '. ' + T(t.question || first.text) + '</h3>' + (t.question ? '<p>' + T(first.text) + '</p>' : '') +
+      (first.example ? example(first.example) : '');
+    rest.forEach((it) => { html += '<p>' + T(it.text) + '</p>' + (it.example ? example(it.example) : ''); });
+    html += radios('gate:' + t.id, ['Yes', 'No']);
     if (isOpen(t)) html += textarea('note:' + t.id, boxFor(t), 2);
     return html + '</div>';
   }
   function screenSV() {
     return pageHead('SV', SV_PAGE.title) +
-      '<p>' + T(VALIDITY.SV.question) + '</p>' +
-      '<p class="note">' + T(SV_PAGE.note) + '</p>' +
-      '<div class="sub">' + threatsFor('SV').map((t, i) => threatCard(t, i + 1)).join('') + '</div>';
+      (SV_PAGE.note ? '<p class="note">' + T(SV_PAGE.note) + '</p>' : '') +
+      '<div class="sub">' + threatsFor('SV').map((t, i) => (t.gate ? questionBlock(t, i + 1) : threatCard(t, i + 1))).join('') + '</div>';
   }
   function screenOT() {
     let html = pageHead('OT', OTHER.title) + '<p>' + T(OTHER.question) + '</p>' + guide(OTHER.guidelines) + radios('OT', ['Yes', 'No']);
@@ -236,7 +256,13 @@
     return '<h1>' + esc(INTRO.title) + '</h1>' +
       '<p class="muted">' + esc(INTRO.lead) + '</p>' +
       '<ul>' + INTRO.bullets.map((b) => '<li>' + b + '</li>').join('') + '</ul>' +
-      '<p class="muted"><button type="button" class="link" id="load-example">' + esc(INTRO.exampleLink) + '</button> ' + esc(INTRO.exampleNote) + '</p>';
+      '<p class="muted"><button type="button" class="link" id="load-example">' + esc(INTRO.exampleLink) + '</button> ' + esc(INTRO.exampleNote) + '</p>' +
+      '<p class="muted"><button type="button" class="link" id="load-yes">' + esc(INTRO.allYesLink) + '</button> ' + esc(INTRO.allYesNote) + '</p>';
+  }
+  // The overview after Start: what this checklist is about.
+  function screenAbout() {
+    return '<p class="kicker">Overview</p><h2>' + esc(ABOUT.title) + '</h2>' +
+      ABOUT.sections.map((sec) => '<h3>' + esc(sec.heading) + '</h3>' + sec.paragraphs.map((t) => '<p>' + T(t) + '</p>').join('')).join('');
   }
   function screenA1() {
     return pageHead('A1', A1.title) +
@@ -248,10 +274,9 @@
     const q = QUESTIONS_A[a];
     defined(q.defines);
     let html = pageHead(a, q.question) + '<p>' + T(q.description) + '</p>' + example(q.example) +
-      (q.note ? '<p class="note">' + T(q.note) + '</p>' : '') +
       radios(a, ['Yes', 'No']);
     if (val(a) === 'Yes') {
-      html += textarea(a + '-which', q.ifYes, 2);
+      html += textarea(a + '-which', q.ifYes, 2) + (q.note ? '<p class="note">' + T(q.note) + '</p>' : '');
       if (a === 'A8') html += '<div class="sub">' + PART_B.map(a8Card).join('') + '</div>';
       else html += '<div class="sub">' + threatsFor(a).map((t, i) => threatCard(t, i + 1)).join('') + '</div>';
     }
@@ -276,7 +301,7 @@
   function qaThreat(t, i) {
     if (t.gate) {
       const g = val('gate:' + t.id);
-      return qa(t.page, i + 1, t.name, chipYN('gate:' + t.id), g === 'Yes' ? boxFor(t) : '', g === 'Yes' ? answer(val('note:' + t.id)) : null);
+      return qa(t.page, i + 1, t.name, chipYN('gate:' + t.id), isOpen(t) ? boxFor(t) : '', isOpen(t) ? answer(val('note:' + t.id)) : null);
     }
     return qa(t.page, i + 1, t.name, '', boxFor(t), answer(val('note:' + t.id)));
   }
@@ -290,9 +315,9 @@
     QUESTIONS.forEach((a) => {
       if (val(a) !== 'Yes') return;
       box += '<div class="block">' + jump(a, BOX_A[a]) + '</div>';
-      if (a === 'A8') {
+      if (a === 'A8') { // the boxes per validity type are optional: no [missing] here
         const filled = PART_B.filter((type) => val('note:A8-' + type));
-        if (!filled.length) box += '<div class="qa">' + MISSING + '</div>';
+        if (!filled.length) box += '<div class="qa muted">—</div>';
         filled.forEach((type) => { box += qa(a, 0, VALIDITY[type].name, '', VALIDITY[type].question, answer(val('note:A8-' + type))); });
       } else threatsFor(a).forEach((t, i) => { box += qaThreat(t, i); });
     });
@@ -320,23 +345,21 @@
     L.push('', '## ' + SUMMARY.partB);
     const threatLines = (t, i) => {
       const head = (i + 1) + '. ' + t.name;
-      if (t.gate) { L.push(head + ' ' + yn('gate:' + t.id)); if (val('gate:' + t.id) === 'Yes') L.push('   ' + boxFor(t) + ' ' + ans(val('note:' + t.id))); }
-      else L.push(head, '   ' + boxFor(t) + ' ' + ans(val('note:' + t.id)));
+      if (t.gate) { L.push(head + ' ' + yn('gate:' + t.id)); if (isOpen(t)) L.push('   ' + plain(boxFor(t)) + ' ' + ans(val('note:' + t.id))); }
+      else L.push(head, '   ' + plain(boxFor(t)) + ' ' + ans(val('note:' + t.id)));
     };
     QUESTIONS.forEach((a) => {
       if (val(a) !== 'Yes') return;
       L.push('', '### ' + BOX_A[a], '');
       if (a === 'A8') {
-        const filled = PART_B.filter((type) => val('note:A8-' + type));
-        if (!filled.length) L.push(miss);
-        filled.forEach((type) => L.push('- ' + VALIDITY[type].name + ': ' + val('note:A8-' + type)));
+        PART_B.filter((type) => val('note:A8-' + type)).forEach((type) => L.push('- ' + VALIDITY[type].name + ': ' + val('note:A8-' + type)));
       } else threatsFor(a).forEach(threatLines);
     });
     L.push('', '### ' + SUMMARY.statistical, '');
     threatsFor('SV').forEach(threatLines);
     L.push('', '### ' + SUMMARY.other + ' ' + yn('OT'), '');
     if (val('OT') === 'Yes') L.push(OTHER.ifYes + ' ' + ans(val('OT-which')));
-    L.push('', '_Filled with the validity checklist at https://sbordt.github.io/fmr-checklist/_');
+    L.push('', '_Filled with the checklist at https://sbordt.github.io/fmr-checklist/_');
     return L.join('\n');
   }
   function download(name, content, type) {
@@ -357,17 +380,21 @@
     const step = list[i];
     let html;
     if (step.id === 'intro') html = screenIntro();
+    else if (step.id === 'about') html = screenAbout();
     else if (step.id === 'A1') html = screenA1();
     else if (QUESTIONS.includes(step.id)) html = screenA(step.id);
     else if (step.id === 'SV') html = screenSV();
     else if (step.id === 'OT') html = screenOT();
     else html = screenSummary();
     $('#screen').innerHTML = html;
-    $('#progress-label').textContent = step.id === 'intro' ? '' : step.id === 'summary' ? 'Done' : 'Page ' + i + ' of ' + ORDER.length;
+    // Boxes can be dragged taller, but not smaller than their initial size.
+    document.querySelectorAll('#screen textarea').forEach((ta) => { ta.style.minHeight = ta.offsetHeight + 'px'; });
+    const page = ORDER.indexOf(step.id) + 1;
+    $('#progress-label').textContent = page ? 'Page ' + page + ' of ' + ORDER.length : step.id === 'summary' ? 'Done' : '';
     $('#progress-bar').style.width = Math.round(100 * i / (list.length - 1)) + '%';
     $('#back').disabled = (i === 0);
     $('#next').textContent = step.id === 'intro' ? 'Start' : step.id === 'summary' ? 'Review from the start' : (i === list.length - 2 ? 'Summary' : 'Next');
-    $('#foot').hidden = !(step.id === 'intro' || step.id === 'summary');
+    $('#foot').hidden = !(step.id === 'intro' || step.id === 'about' || step.id === 'summary');
     if (!(opts && opts.keepScroll)) window.scrollTo(0, 0);
     save();
   }
@@ -402,6 +429,7 @@
     const el = ev.target.closest('button'); if (!el) return;
     if (el.dataset.go) { goTo(el.dataset.go); return; }
     if (el.id === 'load-example') { loadExample(); return; }
+    if (el.id === 'load-yes') { loadAllYes(); return; }
     if (el.id === 'copy-md') { try { await navigator.clipboard.writeText(markdown()); msg('Copied to the clipboard.'); } catch (e) { msg('Clipboard unavailable; copy the text from the box.'); } }
     else if (el.id === 'download-md') download('validity-checklist.md', markdown(), 'text/markdown');
     else if (el.id === 'download-json') download('validity-checklist.json', JSON.stringify(state, null, 2), 'application/json');
@@ -422,6 +450,14 @@
   function loadExample() {
     Object.keys(state).forEach((k) => delete state[k]);
     Object.assign(state, EXAMPLE);
+    render();
+  }
+  // For debugging: every Yes/No answered with Yes, so that all texts unfold; starts on page 1.
+  function loadAllYes() {
+    Object.keys(state).forEach((k) => delete state[k]);
+    state.step = 'A1';
+    QUESTIONS.concat(['OT']).forEach((a) => { state[a] = 'Yes'; });
+    THREATS.filter((t) => t.gate).forEach((t) => { state['gate:' + t.id] = 'Yes'; });
     render();
   }
 
@@ -446,12 +482,13 @@
   document.addEventListener('click', (ev) => { const t = ev.target.closest && ev.target.closest('.term'); if (t) { if (tip.hidden) showTip(t); else hideTip(); } else if (!tip.hidden) hideTip(); });
 
   const wantExample = /[?&]example\b/.test(window.location.search);
-  if (wantExample || /[?&]reset\b/.test(window.location.search)) {
+  const wantYes = /[?&]yes\b/.test(window.location.search);
+  if (wantExample || wantYes || /[?&]reset\b/.test(window.location.search)) {
     try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignore */ }
     try { window.history.replaceState(null, '', window.location.pathname); } catch (e) { /* ignore */ }
   }
   load();
-  if (wantExample) loadExample(); else render();
+  if (wantExample) loadExample(); else if (wantYes) loadAllYes(); else render();
 })();
 </script>
 </body>
