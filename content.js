@@ -25,7 +25,7 @@ const CONTENT = {
   // ---- First page ---------------------------------------------------------
   intro: {
     title: `A Checklist for Foundation Model Research`,
-    lead: `Foundation model research relies on strategies that approximate the ideal experiment. This introduces hidden assumptions that that pose threats to the validity of research findings. This checklists walks the user through some of the most common approximation strategies and helps to identify the relevant validity threats.`,
+    lead: `Training a frontier model is expensive. Research on foundation models therefore works with approximations: smaller models, cheaper stand-ins for the training runs or measurements of interest, models that others have trained, or a single training run instead of many. Every approximation relies on assumptions. This checklist helps authors and reviewers to identify the approximations that a paper makes and to check whether the assumptions behind them are addressed.`,
     bullets: [
       `The checklist consists of 10 high-level question with individual follow-ups.`,
       `Every question asks the user if a research strategy is being employed and how.`,

@@ -260,8 +260,8 @@
 
   function screenIntro() {
     return '<h1>' + esc(INTRO.title) + '</h1>' +
-      '<p class="muted">' + esc(INTRO.lead) + '</p>' +
-      '<ul>' + INTRO.bullets.map((b) => '<li>' + b + '</li>').join('') + '</ul>' +
+      '<p class="muted">' + marks(esc(INTRO.lead)) + '</p>' +
+      '<ul>' + INTRO.bullets.map((b) => '<li>' + marks(b) + '</li>').join('') + '</ul>' +
       '<p class="muted"><button type="button" class="link" id="load-example">' + esc(INTRO.exampleLink) + '</button> ' + esc(INTRO.exampleNote) + '</p>' +
       '<p class="muted"><button type="button" class="link" id="load-yes">' + esc(INTRO.allYesLink) + '</button> ' + esc(INTRO.allYesNote) + '</p>';
   }
