@@ -43,6 +43,8 @@ const CONTENT = {
   // Sentences from the paper (introduction, Section 2, the opening paragraphs
   // of Sections 3-5 and Appendix F), with a few connecting words. Each
   // section has a heading and paragraphs; add or remove sections freely.
+  // A section can also have subsections (each with a heading and paragraphs);
+  // they are shown one level below, after the paragraphs of the section.
   about: {
     title: `What this checklist is about`,
     sections: [
@@ -50,32 +52,40 @@ const CONTENT = {
         heading: `The ideal experiment`,
         paragraphs: [
           `Most research questions about foundation models are interventional: they ask what would happen to model behavior if some aspect of the training recipe (the data, the architecture, the optimizer) were changed. A foundation model is trained according to a particular training recipe, which encompasses all controllable parts of model training. Up to some uncontrollable random variation, the training recipe determines the foundation model along with a range of outcome measures (including upstream outcomes like the training loss, and downstream outcomes such as benchmark scores). A research question then asks about the effect of a treatment on the outcomes for a particular recipe: Would decreasing the learning rate improve downstream performance? Would adding a data source during mid-training improve reasoning behavior?`,
-          `The ideal way to answer such research questions would be a controlled experiment requiring several full training runs. At target scale, meaning for frontier models, such a controlled experiment is, however, computationally infeasible. To work around this constraint, the community has developed various approximation strategies that study model behavior on a compute budget. What these strategies have in common is that they estimate the relevant treatment effect without performing the ideal experiment. Estimating treatment effects in this way is, however, generally only possible under assumptions.`
+          `The ideal way to answer such research questions would be a controlled experiment requiring several full training runs. At target scale, meaning for frontier models, such a controlled experiment is, however, computationally infeasible.`
         ]
       },
       {
-        heading: `Proxy models and scaling laws`,
+        heading: `Research strategies`,
         paragraphs: [
-          `In the proxy approach, a controlled experiment is performed, however some part of the experiment, the model, the treatment, or the outcome, is replaced with a proxy to make it computationally feasible. Proxy models replace the target recipe with a proxy recipe that is cheaper to train. The proxy recipe can have fewer parameters, fewer training tokens, or both. In its simplest form, the proxy approach assumes that the treatment effect does not depend on the considered scale. The more interesting scenario, however, is when the treatment effect depends on the scale in a way that is predictable. In this case, treatment effects and outcomes can be estimated with scaling laws.`
-        ]
-      },
-      {
-        heading: `Proxy treatments and outcomes`,
-        paragraphs: [
-          `Instead of replacing the model with a proxy, we can replace the treatment or outcome. One example of a proxy treatment is to fine-tune a model instead of re-training it from scratch. One example of a proxy outcome is to use a subset of a benchmark to estimate the full benchmark score, or the validation loss instead of task performance.`
-        ]
-      },
-      {
-        heading: `Observational data`,
-        paragraphs: [
-          `The observational approach avoids training new models altogether and instead analyzes the meta-data of existing training runs. In recent works, the observational approach has been employed to derive scaling laws, to improve the pretraining data mix, and to predict benchmark performance from fewer samples.`
-        ]
-      },
-      {
-        heading: `Single-run designs`,
-        paragraphs: [
-          `Single-run approaches approximate the treatment effect with a single training run, by emulating several treatment and control runs from it. The within-run approach regards the training run as containing a set of independently treatable units with separate outcomes, thereby allowing us to form treatment and control populations within a single run. For example, to estimate the average effect of training on a document on the document’s loss, the within-run approach regards each document as a separate unit that can be independently assigned to the treatment group (the training data) or the control group (the validation data).`,
-          `A second approach, the theoretical control approach, derives the control outcomes analytically instead. One instance of this are influence functions, which are used to approximate the contribution of individual training examples to a particular prediction. Another is to inject signals into the training run that can be used to derive a mathematically guaranteed control: in privacy auditing, for example, “canary” data is randomly assigned to the training or validation set.`
+          `To work around this constraint, the community has developed various approximation strategies that study model behavior on a compute budget. What these strategies have in common is that they estimate the relevant treatment effect without performing the ideal experiment. Estimating treatment effects in this way is, however, generally only possible under assumptions.`
+        ],
+        subsections: [
+          {
+            heading: `Proxy models and scaling laws`,
+            paragraphs: [
+              `In the proxy approach, a controlled experiment is performed, however some part of the experiment, the model, the treatment, or the outcome, is replaced with a proxy to make it computationally feasible. Proxy models replace the target recipe with a proxy recipe that is cheaper to train. The proxy recipe can have fewer parameters, fewer training tokens, or both. In its simplest form, the proxy approach assumes that the treatment effect does not depend on the considered scale. The more interesting scenario, however, is when the treatment effect depends on the scale in a way that is predictable. In this case, treatment effects and outcomes can be estimated with scaling laws.`
+            ]
+          },
+          {
+            heading: `Proxy treatments and outcomes`,
+            paragraphs: [
+              `Instead of replacing the model with a proxy, we can replace the treatment or outcome. One example of a proxy treatment is to fine-tune a model instead of re-training it from scratch. One example of a proxy outcome is to use a subset of a benchmark to estimate the full benchmark score, or the validation loss instead of task performance.`
+            ]
+          },
+          {
+            heading: `Observational data`,
+            paragraphs: [
+              `The observational approach avoids training new models altogether and instead analyzes the meta-data of existing training runs. In recent works, the observational approach has been employed to derive scaling laws, to improve the pretraining data mix, and to predict benchmark performance from fewer samples.`
+            ]
+          },
+          {
+            heading: `Single-run designs`,
+            paragraphs: [
+              `Single-run approaches approximate the treatment effect with a single training run, by emulating several treatment and control runs from it. The within-run approach regards the training run as containing a set of independently treatable units with separate outcomes, thereby allowing us to form treatment and control populations within a single run. For example, to estimate the average effect of training on a document on the document’s loss, the within-run approach regards each document as a separate unit that can be independently assigned to the treatment group (the training data) or the control group (the validation data).`,
+              `A second approach, the theoretical control approach, derives the control outcomes analytically instead. One instance of this are influence functions, which are used to approximate the contribution of individual training examples to a particular prediction. Another is to inject signals into the training run that can be used to derive a mathematically guaranteed control: in privacy auditing, for example, “canary” data is randomly assigned to the training or validation set.`
+            ]
+          }
         ]
       },
       {
