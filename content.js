@@ -27,7 +27,7 @@ const CONTENT = {
     title: `A Checklist for Foundation Model Research`,
     lead: `Training foundation models is expensive. Researchers therefore work with approximations: smaller models, cheaper stand-ins for the measurements of interest, models that others have trained, and multiple treatments inside a single training run. Each of these approximations relies on assumptions. This checklist helps authors and reviewers identify the approximations that a paper makes. It also asks how central assumptions behind these approximations are addressed.`,
     bullets: [
-      `The checklist consists of 10 question with individual follow-ups.`,
+      `The checklist consists of 10 questions with individual follow-ups.`,
       `The questions are about different approximation strategies and their implicit assumptions.`,
       `There is also a general question about statistical methodology.`,
       `When the checklist is completed, an overview is generated and the results can be exported.`,
@@ -153,14 +153,14 @@ const CONTENT = {
       question: `Do the experiments involve proxy outcomes?`,
       ifYes: `Which proxy outcomes does the paper measure?`,
       description: `A proxy outcome replaces the outcome the paper cares about with a stand-in that is cheaper to compute, observe or implement.`,
-      example: `The cross-validation loss stands in for performance on a task that we care about. A small subset of benchmark questions stand in for the full benchmark.`,
+      example: `The validation loss stands in for performance on a task that we care about. A small subset of benchmark questions stand in for the full benchmark.`,
       defines: ['proxy outcome']
     },
     A5: {
       question: `Do the experiments involve observational data?`,
       ifYes: `Which experiments involve observational data?`,
-      description: `Data is experimental if the researchers decided which units receive the treatment, meaning they performed the training runs, ablationns or hyperparameter sweeps themselves. In contrast, data is observational if the training runs already existed, meaning that the researchers did not control and do not know how the treatment was assigned.`,
-      example: `Researchers collect the architecture choices and benchmark scores of all publicly released models, use leaderboards or model cards.`,
+      description: `Data is experimental if the researchers decided which units receive the treatment, meaning they performed the training runs, ablations or hyperparameter sweeps themselves. In contrast, data is observational if the training runs already existed, meaning that the researchers did not control and do not know how the treatment was assigned.`,
+      example: `Researchers collect the architecture choices and benchmark scores of all publicly released models, or use leaderboards or model cards.`,
       defines: ['observational data']
     },
     A6: {
@@ -231,7 +231,7 @@ const CONTENT = {
       items: [
         {
           text: `The paper needs to justify why the conclusions also hold for the target model. In general, effects measured on proxy models can change in size, or even in sign, as the model size or the amount of training data is being increased.`,
-          example: `The optimal learning rate often depends on the model size, a naive extrapolation from 1B to 70B could be wrong.`
+          example: `The optimal learning rate often depends on the model size; a naive extrapolation from 1B to 70B could be wrong.`
         }
       ]
     },
@@ -271,7 +271,7 @@ const CONTENT = {
       items: [
         {
           text: `The paper needs to argue that the proxy acts on the outcome in the same way that the original treatment would. In general, two treatments that look alike can act on the outcome in different ways, so the effect measured under the proxy may be different from the one that would be measured under the original treatment.`,
-          example: `Multi-epoch fine-tuning memorizes far more than single-epoch pre-training. Therefore, multi-epoch fine-tuning is not a good proxy to measure privacy leakage during pretraining.`
+          example: `Multi-epoch fine-tuning memorizes far more than single-epoch pretraining. Therefore, multi-epoch fine-tuning is not a good proxy to measure privacy leakage during pretraining.`
         }
       ]
     },
@@ -284,7 +284,7 @@ const CONTENT = {
       items: [
         {
           text: `The paper needs to argue that the proxy reacts to the treatment in the same way that the original outcome would. In general, the treatment may affect the measured outcome but not the outcome of interest, or vice versa.`,
-          example: `An improvement in the cross-validation loss after pretraining is not always guaranteed to improve performance after post-training. Therefore, the cross-validation loss after pretraining is an imperfect proxy for post-training performance.`
+          example: `An improvement in the validation loss after pretraining is not always guaranteed to improve performance after post-training. Therefore, the validation loss after pretraining is an imperfect proxy for post-training performance.`
         }
       ]
     },
