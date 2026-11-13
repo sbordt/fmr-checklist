@@ -1,7 +1,7 @@
 # A Checklist for Foundation Model Research
 
-Source of the website at **https://sbordt.github.io/fmr-checklist/**: a checklist for
-authors and reviewers of foundation model research, filled in step by step.
+Source of the checklist website: a checklist for authors and reviewers of
+foundation model research, filled in step by step.
 
 * Ten pages: the research question; the approximation strategies of the
   experiment, one Yes/No question each (proxy models, proxy treatments, proxy
@@ -13,8 +13,8 @@ authors and reviewers of foundation model research, filled in step by step.
   the example of the paper's checklist and a box asking how the paper addresses
   the threat. Threats that may or may not occur (for example, the best of many
   comparisons) are asked with a Yes/No first.
-* The summary exports the result as Markdown or JSON; answers are kept in the
-  browser only.
+* The summary exports the result as Markdown; answers are kept in the browser
+  only.
 
 The questions, descriptions, examples, and threats are taken from the checklist
 appendix of the paper *A Framework and Checklist for Validity Threats in
@@ -34,8 +34,7 @@ any, was added while drafting and is not from the paper.
 
 The site is static: open `index.html` in a browser, or serve the folder with
 `python3 -m http.server`. After editing `content.js`, `node --check content.js`
-tells whether the file still parses (a stray backtick is the usual culprit). GitHub Pages publishes the `main` branch from the
-repository root. Opening the page with `?reset` (for example
-`https://sbordt.github.io/fmr-checklist/?reset`) clears the saved answers and
-starts on the first page; "Start over" in the header does the same after a
-confirmation.
+tells whether the file still parses (a stray backtick is the usual culprit).
+Opening the page with `?reset` (for example `index.html?reset`) clears the
+saved answers and starts on the first page; "Start over" in the header does
+the same after a confirmation.

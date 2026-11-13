@@ -127,15 +127,6 @@
   'use strict';
 
   // ------------------------------------------------------------------
-  // Content. Questions, descriptions, examples, and the bullet points of
-  // the threats are copied from the checklist appendix of the paper
-  // (iclr/sections/validity-checklist.tex, state of 2026-11-11). The labels
-  // (A5-IV1, ...) are the labels of the bullet points in the paper; they are
-  // kept in the data for syncing with the paper but not shown on the page.
-  // Entries marked src: 'new' are not from the paper and are shown in pink
-  // until reviewed.
-  // ------------------------------------------------------------------
-  // ------------------------------------------------------------------
   // Content: all texts come from content.js (CONTENT) and the filled example
   // from example.js (EXAMPLE). This file only renders them.
   // ------------------------------------------------------------------
@@ -345,11 +336,8 @@
     box += '<div class="block">' + jump('OT', SUMMARY.other) + ' ' + chipYN('OT') + '</div>';
     if (val('OT') === 'Yes') box += qa('OT', 0, '', '', OTHER.ifYes, answer(val('OT-which')));
     box += '</div></div>';
-    return '<p class="kicker">Summary</p>' +
-      '<p class="muted">' + esc(SUMMARY.hint) + '</p>' + box +
-      '<div class="toolbar"><button type="button" class="primary" id="copy-md">Copy as Markdown</button>' +
-      '<button type="button" id="download-md">Download Markdown</button><button type="button" id="download-json">Download JSON</button>' +
-      '<button type="button" id="print">Print</button><button type="button" id="reset">Start over</button></div>';
+    return '<p class="kicker">Summary</p>' + box +
+      '<div class="toolbar"><button type="button" class="primary" id="copy-md">Copy as Markdown</button></div>';
   }
 
   // ------------------------------------------------------------------
@@ -378,13 +366,7 @@
     threatsFor('SV').forEach(threatLines);
     L.push('', '### ' + SUMMARY.other + ' ' + yn('OT'), '');
     if (val('OT') === 'Yes') L.push(OTHER.ifYes + ' ' + ans(val('OT-which')));
-    L.push('', '_Filled with the checklist at https://sbordt.github.io/fmr-checklist/_');
     return L.join('\n');
-  }
-  function download(name, content, type) {
-    const url = URL.createObjectURL(new Blob([content], { type: type }));
-    const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
   function msg(text) { const el = $('#msg'); el.textContent = text; setTimeout(() => { if (el.textContent === text) el.textContent = ''; }, 3000); }
 
@@ -409,10 +391,11 @@
     // Boxes can be dragged taller, but not smaller than their initial size.
     document.querySelectorAll('#screen textarea').forEach((ta) => { ta.style.minHeight = ta.offsetHeight + 'px'; });
     const page = ORDER.indexOf(step.id) + 1;
-    $('#progress-label').textContent = page ? 'Page ' + page + ' of ' + ORDER.length : step.id === 'summary' ? 'Done' : '';
+    $('#progress-label').textContent = page ? 'Page ' + page + ' of ' + ORDER.length : '';
     $('#progress-bar').style.width = Math.round(100 * i / (list.length - 1)) + '%';
     $('#back').disabled = (i === 0);
-    $('#next').textContent = step.id === 'intro' ? 'Start' : step.id === 'summary' ? 'Review from the start' : (i === list.length - 2 ? 'Summary' : 'Next');
+    $('#next').hidden = (step.id === 'summary'); // the summary is the last page
+    $('#next').textContent = step.id === 'intro' ? 'Start' : (i === list.length - 2 ? 'Summary' : 'Next');
     if (!(opts && opts.keepScroll)) window.scrollTo(0, 0);
     save();
   }
@@ -425,10 +408,7 @@
   function goTo(id) { state.step = id; render(); }
 
   $('#back').addEventListener('click', () => go(-1));
-  $('#next').addEventListener('click', () => {
-    const list = steps();
-    if (list[currentIndex(list)].id === 'summary') goTo('intro'); else go(1);
-  });
+  $('#next').addEventListener('click', () => go(1));
 
   // Inputs on the current screen write to the state.
   $('#screen').addEventListener('input', (ev) => {
@@ -449,14 +429,9 @@
     if (el.id === 'load-example') { loadExample(); return; }
     if (el.id === 'load-yes') { loadAllYes(); return; }
     if (el.id === 'copy-md') { try { await navigator.clipboard.writeText(markdown()); msg('Copied to the clipboard.'); } catch (e) { msg('Clipboard unavailable; copy the text from the box.'); } }
-    else if (el.id === 'download-md') download('validity-checklist.md', markdown(), 'text/markdown');
-    else if (el.id === 'download-json') download('validity-checklist.json', JSON.stringify(state, null, 2), 'application/json');
-    else if (el.id === 'print') window.print();
-    else if (el.id === 'reset') resetAll(true);
   });
-  // Clears all answers and starts again on the first page; also reachable as
-  // "Start over" in the header on every page, and without a dialog by opening
-  // the page with ?reset (for testing).
+  // Clears all answers and starts again on the first page: "Start over" in the
+  // header on every page, or, without a dialog, opening the page with ?reset.
   function resetAll(ask) {
     if (ask && !window.confirm('Clear all answers and start over?')) return;
     Object.keys(state).forEach((k) => delete state[k]);

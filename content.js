@@ -25,13 +25,13 @@ const CONTENT = {
   // ---- First page ---------------------------------------------------------
   intro: {
     title: `A Checklist for Foundation Model Research`,
-    lead: `Training a frontier model is expensive. Research on foundation models therefore works with approximations: smaller models, cheaper stand-ins for the training runs or measurements of interest, models that others have trained, or a single training run instead of many. Every approximation relies on assumptions. This checklist helps authors and reviewers to identify the approximations that a paper makes and to check whether the assumptions behind them are addressed.`,
+    lead: `Training foundation models is expensive. Researchers therefore work with approximations: smaller models, cheaper stand-ins for the measurements of interest, models that others have trained, and multiple treatments inside a single training run. Each of these approximations relies on assumptions. This checklist helps authors and reviewers identify the approximations that a paper makes. It also asks how central assumptions behind these approximations are addressed.`,
     bullets: [
-      `The checklist consists of 10 high-level question with individual follow-ups.`,
-      `Every question asks the user if a research strategy is being employed and how.`,
-      `The final question is a general question about statistical methodology.`,
-      `The goal of the checklist is to help authors and reviewers identify threats to the validity of a given paper or research finding.`,
-      `Disclaimer: Completing the checklist does not guarantee that a research result is valid.`
+      `The checklist consists of 10 question with individual follow-ups.`,
+      `The questions are about different approximation strategies and their implicit assumptions.`,
+      `There is also a general question about statistical methodology.`,
+      `When the checklist is completed, an overview is generated and the results can be exported.`,
+      `Disclaimer: Completing this checklist does not guarantee that a research result is valid.`
     ],
     exampleLink: `Load a filled example`,
     exampleNote: `(the case study of Ruan et al., 2024, from the paper). This replaces your answers.`,
@@ -52,7 +52,7 @@ const CONTENT = {
         heading: `The ideal experiment`,
         paragraphs: [
           `Most research questions about foundation models are interventional: they ask what would happen to model behavior if some aspect of the training recipe were changed. Up to some uncontrollable random variation, the training recipe determines the foundation model along with a range of outcome measures. This includes upstream outcomes like the training loss, and downstream outcomes such as benchmark scores. The research question asks about the effect of a treatment on the outcomes for a particular training recipe. For example, would decreasing the learning rate improve downstream performance? `,
-          `The ideal way to answer [[these]] research questions is a controlled experiment with several full training runs. However, the ideal experiment is often computationally infeasible, which gives rise to the need for approximative research strategies.`
+          `The ideal way to answer these research questions is a controlled experiment with several full training runs. However, the ideal experiment is often computationally infeasible, which gives rise to the need for approximative research strategies.`
         ]
       },
       {
@@ -64,37 +64,37 @@ const CONTENT = {
           {
             heading: `Proxy models and scaling laws`,
             paragraphs: [
-              `Proxy models replace the target recipe with a proxy recipe that is cheaper to train[[, and the controlled experiment is performed with the proxy]]. The proxy recipe can have fewer parameters, fewer training tokens, or both. In its simplest form, [[this strategy]] assumes that the treatment effect does not depend on the considered scale. The more interesting scenario, however, is when the treatment effect depends on the scale in a way that is predictable. In this case, treatment effects and outcomes can be estimated with scaling laws.`
+              `Proxy models replace the target recipe with a proxy recipe that is cheaper to train, and the controlled experiment is performed with the proxy. The proxy recipe can have fewer parameters, fewer training tokens, or both. In its simplest form, this strategy assumes that the treatment effect does not depend on the considered scale. The more interesting scenario, however, is when the treatment effect depends on the scale in a way that is predictable. In this case, treatment effects and outcomes can be estimated with scaling laws.`
             ]
           },
           {
             heading: `Proxy treatments`,
             paragraphs: [
-              `[[Proxy treatments keep the target recipe but replace the treatment with a stand-in that is cheaper to compute, observe or implement.]] One example of a proxy treatment is to fine-tune a model instead of re-training it from scratch.`
+              `Proxy treatments keep the target recipe but replace the treatment with a stand-in that is cheaper to compute, observe or implement. One example of a proxy treatment is to fine-tune a model instead of re-training it from scratch.`
             ]
           },
           {
             heading: `Proxy outcomes`,
             paragraphs: [
-              `[[Proxy outcomes replace the outcome with a cheaper stand-in.]] One example of a proxy outcome is to use a subset of a benchmark to estimate the full benchmark score, or the validation loss instead of task performance.`
+              `Proxy outcomes replace the outcome with a cheaper stand-in. One example of a proxy outcome is to use a subset of a benchmark to estimate the full benchmark score, or the validation loss instead of task performance.`
             ]
           },
           {
             heading: `Observational data`,
             paragraphs: [
-              `The observational approach avoids training new models altogether and instead analyzes the meta-data of existing training runs. In recent works, [[it]] has been employed to derive scaling laws, to improve the pretraining data mix, and to predict benchmark performance from fewer samples.`
+              `The observational approach avoids training new models altogether and instead analyzes the meta-data of existing training runs. In recent works, it has been employed to derive scaling laws, to improve the pretraining data mix, and to predict benchmark performance from fewer samples.`
             ]
           },
           {
-            heading: `[[Units within a single training run]]`,
+            heading: `Units within a single training run`,
             paragraphs: [
-              `[[This strategy approximates]] the treatment effect with a single training run, by emulating several treatment and control runs from it. [[It]] regards the training run as containing a set of independently treatable units with separate outcomes, thereby allowing us to form treatment and control populations within a single run. For example, to estimate the average effect of training on a document on the document’s loss, each document [[is regarded]] as a separate unit that can be independently assigned to the treatment group (the training data) or the control group (the validation data).`
+              `This strategy approximates the treatment effect with a single training run, by emulating several treatment and control runs from it. It regards the training run as containing a set of independently treatable units with separate outcomes, thereby allowing us to form treatment and control populations within a single run. For example, to estimate the average effect of training on a document on the document’s loss, each document is regarded as a separate unit that can be independently assigned to the treatment group (the training data) or the control group (the validation data).`
             ]
           },
           {
-            heading: `[[Theoretical controls]]`,
+            heading: `Theoretical controls`,
             paragraphs: [
-              `[[Theoretical controls derive]] the control outcomes analytically instead [[of measuring them]]. One instance of this are influence functions, which are used to approximate the contribution of individual training examples to a particular prediction. Another is to inject signals into the training run that can be used to derive a mathematically guaranteed control: in privacy auditing, for example, “canary” data is randomly assigned to the training or validation set.`
+              `Theoretical controls derive the control outcomes analytically instead of measuring them. One instance of this are influence functions, which are used to approximate the contribution of individual training examples to a particular prediction. Another is to inject signals into the training run that can be used to derive a mathematically guaranteed control: in privacy auditing, for example, “canary” data is randomly assigned to the training or validation set.`
             ]
           }
         ]
@@ -103,8 +103,7 @@ const CONTENT = {
         heading: `Validity threats`,
         paragraphs: [
           `Violations of necessary assumptions in the estimation of treatment effects pose threats to the validity of research results. For example, if the results from smaller proxy experiments do not generalize across scale, then it is invalid to conclude from small-scale experiments about large-scale behavior. For this reason, it is important that the assumptions that underlie different research strategies are explicitly discussed.`,
-          `[[At a high level, there are four types of validity that can be threatened.]] Statistical validity asks whether an estimate from a finite, noisy sample reliably reflects the true effect; internal validity, whether a reliable estimate reflects a genuine causal effect; external validity, whether a genuine causal effect transfers to the recipe that we care about; and construct validity, whether the operationalization of treatment and outcome actually reflects the constructs in the research question. [[Every research strategy rests on its own assumptions, and each assumption, if violated, affects one of these types of validity.]]`,
-          `This checklist can be used to identify the research strategies of a paper and the implicit assumptions that come with them.`
+          `At a high level, there are four types of validity that can be threatened. Statistical validity asks whether an estimate from a finite, noisy sample reliably reflects the true effect; internal validity, whether a reliable estimate reflects a genuine causal effect; external validity, whether a genuine causal effect transfers to the recipe that we care about; and construct validity, whether the operationalization of treatment and outcome actually reflects the constructs in the research question. Every research strategy rests on its own assumptions, and each assumption, if violated, affects one of these types of validity.`
         ]
       }
     ]
@@ -181,8 +180,7 @@ const CONTENT = {
       question: `Do the experiments involve other approximations?`,
       ifYes: `Which other approximations are performed?`,
       description: `List any way in which the design deviates from the ideal experiment that is not covered by the previous questions.`,
-      example: `Measuring the outcome only at coarse checkpoint intervals; analyzing a subsample of the units; having access to a dataset that is iid. but not included in the training data.`,
-      note: `Address any validity types that the approximations threaten. If you are unsure about the validity types, you can use the field at the end of the checklist (other threats).`
+      example: `Measuring the outcome only at coarse checkpoint intervals; analyzing a subsample of the units; having access to a dataset that is iid. but not included in the training data.`
     }
   },
 
@@ -291,6 +289,20 @@ const CONTENT = {
       ]
     },
     {
+      id: `A5-SV1`,
+      page: `A5`,
+      type: `SV`,
+      name: `Sample size and noise`,
+      label: `A5-SV1`,
+      box: `How does the paper establish this?`,
+      items: [
+        {
+          text: `The paper needs to establish that the sample size is large enough, and account for noise in the estimate.`,
+          example: `The number of frontier training runs is small.`
+        }
+      ]
+    },
+    {
       id: `A5-IV1`,
       page: `A5`,
       type: `IV`,
@@ -327,12 +339,8 @@ const CONTENT = {
       defines: ['SUTVA', 'interference', 'consistency'],
       items: [
         {
-          text: `The paper needs to establish that each unit’s outcome depends only on its own treatment, not on the treatments other units received.`,
-          example: `This might not be the case when units share training data or evaluation pools across runs.`
-        },
-        {
-          text: `In addition, the paper needs to establish that all treated units received the same version of the treatment.`,
-          example: `“Document is in the training set” hides deduplication, number of epochs, and data ordering.`
+          text: `The paper needs to establish that each unit’s outcome depends only on its own treatment, not on the treatments other units received. In addition, the paper needs to establish that all treated units received the same version of the treatment.`,
+          example: `SUTVA might be violated when units share training data or evaluation pools across training runs.`
         }
       ]
     },
@@ -344,22 +352,8 @@ const CONTENT = {
       label: `A5-EV1`,
       items: [
         {
-          text: `If the experiments pool across many model families, then the measured effect is an average over the pooled recipes, and the effect for the target training recipe could be different.`,
+          text: `If the experiments pool data from many model families, then the measured effect is an average over the pooled recipes, and the effect for the target training recipe could be different.`,
           example: `Scaling law coefficients change with the pretraining data composition.`
-        }
-      ]
-    },
-    {
-      id: `A5-SV1`,
-      page: `A5`,
-      type: `SV`,
-      name: `Statistical validity`,
-      label: `A5-SV1`,
-      box: `How does the paper establish that the sample size is large enough, and account for noise in the estimate?`,
-      items: [
-        {
-          text: `The paper needs to establish that the sample size is large enough, and account for noise in the estimate.`,
-          example: `The number of frontier training runs is small.`
         }
       ]
     },
@@ -367,7 +361,7 @@ const CONTENT = {
       id: `A5-CV1`,
       page: `A5`,
       type: `CV`,
-      name: `Construct validity, if combined with proxies`,
+      name: `Construct validity`,
       label: `A5-CV1`,
       gate: `Do the experiments implicitly involve proxy outcomes or proxy treatments?`,
       box: `How does the paper address the construct validity of the proxies?`,
@@ -386,12 +380,8 @@ const CONTENT = {
       defines: ['exchangeability', 'parallel trends'],
       items: [
         {
-          text: `The paper needs to establish that the treated and the control units do not differ systematically.`,
+          text: `The paper needs to establish that the treated and the control units do not differ systematically. If the paper uses difference-in-differences estimators, instrumental variables, or a regression discontinuity design, then the paper needs to discuss the assumptions of that strategy.`,
           example: `The within-run estimate overestimates memorization when the treated units are sampled randomly, and the untreated units reflect near training duplicates, a particular domain (code), or especially hard examples.`
-        },
-        {
-          text: `If the paper uses difference-in-differences estimators, instrumental variables, or a regression discontinuity design, then the paper needs to discuss the assumptions of that strategy.`,
-          example: `Difference-in-differences assumes parallel trends, that is, that treated and untreated units would have developed alike without the treatment.`
         }
       ]
     },
@@ -550,7 +540,6 @@ const CONTENT = {
   // ---- The summary page ---------------------------------------------------
   // strategies: the row names of Part A in the summary box.
   summary: {
-    hint: `Click a row to go back to its page. Answers that are still missing are shown in red.`,
     title: `Checklist Summary`,
     partA: `Part A — Approximation Strategies`,
     partB: `Part B — Validity Threats`,
@@ -601,9 +590,10 @@ const CONTENT = {
     consistency: `All treated units received the same version of the treatment, so the observed outcome is the outcome of the treatment the paper names. For example, “document is in the training set” hides deduplication, number of epochs, and data ordering.`,
     'potential outcome': `The outcome a unit would have under a given treatment, whether or not it actually received it. The causal effect is the difference between the potential outcomes under treatment and under control.`,
     'identifying assumptions': `The assumptions under which the association between treatment and outcome is a causal effect. For example, exchangeability, positivity, and SUTVA, or parallel trends in a difference-in-differences design.`,
-    'difference-in-differences': `A design that compares the change over time in treated units to that in untreated units. It replaces exchangeability with the parallel trends assumption.`,
-    'parallel trends': `Treated and untreated units would have developed alike without the treatment; the assumption behind difference-in-differences.`,
-    'regression discontinuity': `Treatment is determined by a cutoff; potential outcomes are assumed to vary continuously across it, so units just above and below the cutoff are exchangeable in the limit.`,
+    // Entries that are switched off (remove the // to show them again):
+    // 'difference-in-differences': `A design that compares the change over time in treated units to that in untreated units. It replaces exchangeability with the parallel trends assumption.`,
+    // 'parallel trends': `Treated and untreated units would have developed alike without the treatment; the assumption behind difference-in-differences.`,
+    // 'regression discontinuity': `Treatment is determined by a cutoff; potential outcomes are assumed to vary continuously across it, so units just above and below the cutoff are exchangeable in the limit.`,
     operationalization: `The concrete implementation of a concept. For example, a paper might operationalize the concept “reasoning ability” by measuring a benchmark score.`,
     'statistical validity': `Whether the estimate from a finite, noisy sample reliably reflects the true underlying quantity. The threats are noise, a poorly fitted curve, and picking the best of many comparisons.`,
     'internal validity': `Whether a reliable estimate reflects a genuine causal effect of the treatment, rather than some other difference between the compared groups or an influence of the units on each other. For example, when recent models with a new architecture achieve better outcomes, that does not mean that the architecture caused the improvements.`,
